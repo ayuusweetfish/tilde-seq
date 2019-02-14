@@ -1,0 +1,81 @@
+// Click/Drag: Draw/Edit
+// Ctrl + drag: Pan
+// Ctrl + scroll: Zoom
+
+CELL_HEIGHT = 6
+CELL_WIDTH = 10
+
+roll_x = 0
+roll_y = 0
+roll_w = -1
+roll_h = -1
+
+roll_px = 0
+roll_py = 0
+
+roll_ctrl = 0
+roll_activated = 0
+roll_mx = -1
+roll_my = -1
+roll_changed = 0
+
+fn roll_mouse_down($x, $y) {
+    if ($x >= roll_x && $x <= roll_x + roll_w &&
+        $y >= roll_y && $y <= roll_y + roll_h)
+    {
+        roll_activated = 1
+        roll_mx = roll_px + $x
+        roll_my = roll_py + $y
+    }
+}
+
+fn roll_mouse_move($x, $y) {
+    if (roll_activated == 0) { ret }
+    roll_px = roll_mx - $x
+    roll_py = roll_my - $y
+    roll_changed = 1
+}
+
+fn roll_mouse_up($x, $y) {
+    roll_activated = 0
+}
+
+roll_notes = new(16, 1, INT)
+roll_note_cnt = 0
+
+fn add_note($x, $y, $len) {
+    $n = new()
+    $n.x = $x
+    $n.y = $y
+    $n.len = $len
+
+    roll_notes[roll_note_cnt] = $n
+    roll_note_cnt + 1
+    ret($n)
+}
+
+fn draw_roll() {
+    fbox(roll_x, roll_y, roll_w, roll_h, nord1)
+
+    $x_sta = floor(roll_px / CELL_WIDTH)
+    $x_fin = ceil((roll_px + roll_w) / CELL_WIDTH)
+    $y_sta = floor(roll_py / CELL_HEIGHT)
+    $y_fin = ceil((roll_py + roll_h) / CELL_HEIGHT)
+
+    $i = 0
+    while ($i < roll_note_cnt) {
+        $n = roll_notes[$i]
+
+        if ($n.x <= $x_fin && $n.x + $n.len - 1 >= $x_sta &&
+            $n.y >= $y_sta && $n.y <= $y_fin)
+        {
+            fbox(roll_x + $n.x * CELL_WIDTH - roll_px,
+                roll_y + $n.y * CELL_HEIGHT - roll_py,
+                CELL_WIDTH * $n.len,
+                CELL_HEIGHT,
+                nord12)
+        }
+
+        $i + 1
+    }
+}

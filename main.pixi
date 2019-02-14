@@ -32,6 +32,7 @@ frames = 0
 start_timer(0)
 
 include "buttons.pixi"
+include "roll.pixi"
 
 add_btn(-120, -90, 50, 30, "OuO", nord4, nord5, 0x203d, {
     printf("AAA\n")
@@ -45,6 +46,15 @@ add_btn(-120, -30, 50, 30, "OwO", nord12, nord5, 0x80a0, {
 add_btn(-120, 0, 50, 30, "OxO", nord13, nord5, 0x80a0, {
     printf("DDD\n")
 })
+
+roll_x = 50
+roll_y = -100
+roll_w = 100
+roll_h = 150
+add_note(0, 0, 3)
+add_note(0, 2, 1)
+add_note(1, 4, 16)
+add_note(1, 6, 36)
 
 fn draw() {
     transp(255)
@@ -61,6 +71,7 @@ fn draw() {
 
     sprintf(special_btn.text, "OvO %d", xsize)
 
+    draw_roll()
     draw_btns()
 }
 
@@ -88,19 +99,31 @@ while (running) {
         if (EVT[EVT_TYPE] == EVT_QUIT) {
             running = 0
         }
+        // +1 and -1 since <control> and <command> on Mac
+        // are both recognized as KEY_CTRL
+        if (EVT[EVT_TYPE] == EVT_BUTTONDOWN) {
+            if (EVT[EVT_KEY] == KEY_CTRL) { roll_ctrl + 1 }
+        }
+        if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
+            if (EVT[EVT_KEY] == KEY_CTRL) { roll_ctrl - 1 }
+        }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONDOWN) {
             btn_mouse_down(EVT[EVT_X], EVT[EVT_Y])
+            roll_mouse_down(EVT[EVT_X], EVT[EVT_Y])
             is_down = 1
         }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONUP) {
             btn_mouse_up(EVT[EVT_X], EVT[EVT_Y])
+            roll_mouse_up(EVT[EVT_X], EVT[EVT_Y])
             is_down = 0
         }
         if (is_down && EVT[EVT_TYPE] == EVT_MOUSEMOVE) {
             btn_mouse_move(EVT[EVT_X], EVT[EVT_Y])
+            roll_mouse_move(EVT[EVT_X], EVT[EVT_Y])
         }
     }
 
-    changed = changed || btn_changed
+    changed = changed || btn_changed || roll_changed
     btn_changed = 0
+    roll_changed = 0
 }
