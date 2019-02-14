@@ -1,0 +1,77 @@
+btns = new(16)
+btns_cnt = 0
+
+btn_sel_id = -1
+btn_in = 0
+btn_changed = 0
+
+fn add_btn($x, $y, $w, $h, $text, $bg, $fg, $alphas, $callback) {
+    $b = new()
+    $b.x = $x
+    $b.y = $y
+    $b.w = $w
+    $b.h = $h
+    $b.text = $text
+    $b.bg = $bg
+    $b.fg = $fg
+    $b.alphas = $alphas
+    $b.callback = $callback
+
+    btns[btns_cnt] = $b
+    btns_cnt + 1
+    ret($b)
+}
+
+fn draw_btns() {
+    $i = 0
+    while ($i < btns_cnt) {
+        $cur = btns[$i]
+        if (btn_in && $cur == btn_sel_id) {
+            transp(($cur.alphas >> 0) & 0xff)
+        } else {
+            transp(($cur.alphas >> 8) & 0xff)
+        }
+        fbox($cur.x, $cur.y, $cur.w, $cur.h, $cur.bg)
+        transp(255)
+        print($cur.text,
+            $cur.x + $cur.w / 2,
+            $cur.y + $cur.h / 2,
+            $cur.fg)
+        $i + 1
+    }
+}
+
+fn btn_check_in($x, $y, $i) {
+    ret($x >= $i.x && $x <= $i.x + $i.w &&
+        $y >= $i.y && $y <= $i.y + $i.h)
+}
+
+fn btn_mouse_down($x, $y) {
+    $i = 0
+    while ($i < btns_cnt) {
+        if (btn_check_in($x, $y, btns[$i])) {
+            btn_sel_id = btns[$i]
+            btn_in = 1
+            btn_changed = 1
+        }
+        $i + 1
+    }
+}
+
+fn btn_mouse_move($x, $y) {
+    if (btn_sel_id == -1) { ret }
+    $b = btn_check_in($x, $y, btn_sel_id)
+    if (btn_in != $b) {
+        btn_in = $b
+        btn_changed = 1
+    }
+}
+
+fn btn_mouse_up($x, $y) {
+    if (btn_check_in($x, $y, btn_sel_id)) {
+        btn_sel_id.callback()
+        btn_changed = 1
+    }
+    btn_sel_id = -1
+    btn_in = 0
+}
