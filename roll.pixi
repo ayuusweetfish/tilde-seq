@@ -165,9 +165,24 @@ roll_tid = 0
 roll_notes = roll_tracks[0]
 
 fn switch_track($t) {
-    roll_track_sel = (1 << $t)
+    if (roll_ctrl) {
+        if ((roll_track_sel ^ (1 << $t)) != 0) {
+            roll_track_sel ^ (1 << $t)
+        }
+        // Take lowest bit
+        $b = (roll_track_sel & -roll_track_sel)
+        $t = 0
+        // Count trailing zeros
+        while ($b > 1) {
+            $b div 2
+            $t + 1
+        }
+    } else {
+        roll_track_sel = (1 << $t)
+    }
     roll_tid = $t
     roll_notes = roll_tracks[$t]
+    roll_changed = 1
 }
 
 fn add_note($x, $y, $len) {

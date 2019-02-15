@@ -174,7 +174,6 @@ while (running) {
             }
             if ($t != -1) {
                 switch_track($t)
-                changed = 1
             }
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
