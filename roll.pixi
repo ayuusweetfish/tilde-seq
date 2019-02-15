@@ -43,7 +43,6 @@ fn roll_mouse_down($x, $y) {
                 roll_eside = roll_mx
             } else {
                 roll_mx = roll_editing.x - roll_mx
-                printf("%d\n", roll_mx)
             }
             roll_changed = 1
         }
@@ -78,6 +77,10 @@ fn roll_mouse_move($x, $y) {
 
 fn roll_mouse_up($x, $y) {
     roll_activated = 0
+    if (roll_moving == 0) {
+        roll_monophonize(roll_editing)
+        roll_changed = 1
+    }
 }
 
 fn roll_mouse_scrollup($x, $y) {
@@ -127,7 +130,7 @@ fn roll_clamp_p() {
 
 roll_bar = 9
 roll_beat = 3
-roll_notes = new(16, 1, INT)
+roll_notes = new(4096, 1, INT)
 roll_note_cnt = 0
 
 fn add_note($x, $y, $len) {
@@ -139,6 +142,12 @@ fn add_note($x, $y, $len) {
     roll_notes[roll_note_cnt] = $n
     roll_note_cnt + 1
     ret($n)
+}
+
+fn remove_note($i) {
+    remove(roll_notes[$i])
+    roll_note_cnt - 1
+    roll_notes[$i] = roll_notes[roll_note_cnt]
 }
 
 // Finds whether a note exists at cell (x, y)
@@ -154,6 +163,39 @@ fn roll_locate_note($x, $y) {
             if ($n.x == $x) { roll_eside = $n.x + $n.len - 1 }
             if ($n.x + $n.len - 1 == $x) { roll_eside = $n.x }
             break
+        }
+        $i + 1
+    }
+}
+
+// Make the track monophonic w.r.t. a given newly-added note
+fn roll_monophonize($m) {
+    $i = 0
+    while ($i < roll_note_cnt) {
+        $n = roll_notes[$i]
+        if ($n != $m && $n.x + $n.len > $m.x && $m.x + $m.len > $n.x) {
+            if ($n.x < $m.x) {
+                if ($n.x + $n.len <= $m.x + $m.len) {
+                    // Truncate from the right
+                    $n.len = $m.x - $n.x
+                } else {
+                    // Split into two notes
+                    add_note($m.x + $m.len, $n.y,
+                        ($n.x + $n.len) - ($m.x + $m.len))
+                    $n.len = $m.x - $n.x
+                }
+            } else {
+                if ($n.x + $n.len <= $m.x + $m.len) {
+                    // Remove
+                    remove_note($i)
+                    continue
+                } else {
+                    // Truncate from the left
+                    $t = $n.x + $n.len
+                    $n.x = $m.x + $m.len
+                    $n.len = $t - $n.x
+                }
+            }
         }
         $i + 1
     }
