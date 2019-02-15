@@ -34,18 +34,12 @@ start_timer(0)
 include "buttons.pixi"
 include "roll.pixi"
 
-track_colours = new(16)
 track_btns = new(16)
-
-track_colours[0] = nord11
-track_colours[1] = nord12
-track_colours[2] = nord13
-track_colours[3] = nord14
-track_colours[4] = nord8
-track_colours[5] = nord10
-track_colours[6] = nord15
-track_colours[7] = nord4
 track_hotkeys = "QWERTYUI"
+
+fn switch_track_cb($sender) {
+    switch_track($sender.track_idx)
+}
 
 $i = 0
 while ($i < 16) {
@@ -58,7 +52,8 @@ while ($i < 16) {
         $c = get_blend(track_colours[$i - 8], track_colours[($i + 1) % 8], 128)
     }
     track_btns[$i] =
-        add_btn(0, 0, 19, 19, $s, $c, nord6, 0xd0ff, {})
+        add_btn(0, 0, 19, 19, $s, $c, nord6, 0xd0ff, switch_track_cb)
+    track_btns[$i].track_idx = $i
     $i + 1
 }
 

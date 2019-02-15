@@ -76,6 +76,7 @@ fn roll_mouse_move($x, $y) {
 }
 
 fn roll_mouse_up($x, $y) {
+    if (roll_activated == 0) { ret }
     roll_activated = 0
     if (roll_moving == 0) {
         roll_monophonize(roll_editing)
@@ -130,8 +131,40 @@ fn roll_clamp_p() {
 
 roll_bar = 9
 roll_beat = 3
-roll_notes = new(4096, 1, INT)
+roll_tracks = new(16, 1, INT)
+
+$i = 0
+while ($i < 16) {
+    roll_tracks[$i] = new(4096, 1, INT)
+    roll_tracks[$i].cnt = 0
+    $i + 1
+}
+
+track_colours = new(16)
+track_colours[0] = nord11
+track_colours[1] = nord12
+track_colours[2] = nord13
+track_colours[3] = nord14
+track_colours[4] = nord8
+track_colours[5] = nord10
+track_colours[6] = nord15
+track_colours[7] = nord4
+
+// A simple cache-like thing
+roll_tid = 0
+roll_notes = roll_tracks[0]
 roll_note_cnt = 0
+roll_colour = track_colours[0]
+
+fn switch_track($t) {
+    // Delayed writeback
+    roll_tracks[roll_tid].cnt = roll_note_cnt
+
+    roll_tid = $t
+    roll_notes = roll_tracks[$t]
+    roll_note_cnt = roll_tracks[$t].cnt
+    roll_colour = track_colours[$t]
+}
 
 fn add_note($x, $y, $len) {
     $n = new()
@@ -260,7 +293,7 @@ fn draw_roll() {
                 roll_y - ($n.y + 1) * CELL_HEIGHT + roll_py,
                 CELL_WIDTH * $n.len - 1,
                 CELL_HEIGHT,
-                nord12)
+                roll_colour)
         }
 
         $i + 1

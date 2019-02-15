@@ -69,7 +69,7 @@ fn btn_mouse_move($x, $y) {
 
 fn btn_mouse_up($x, $y) {
     if (btn_check_in($x, $y, btn_sel_id)) {
-        btn_sel_id.callback()
+        btn_sel_id.callback(btn_sel_id)
         btn_changed = 1
     }
     btn_sel_id = -1
