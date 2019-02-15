@@ -62,26 +62,46 @@ while ($i < 16) {
     $i + 1
 }
 
-menu_btns = new(8)
-menu_btns_text = new(8)
+menu_btns = new(12)
+menu_btns_text = new(12)
+menu_btns_bg = new(12)
 
 menu_btns_text[0] = "New"
 menu_btns_text[1] = "Open"
 menu_btns_text[2] = "Save"
-menu_btns_text[3] = "Play"
-menu_btns_text[4] = "Options"
-menu_btns_text[5] = "Config"
+menu_btns_text[3] = "Undo"
+menu_btns_text[4] = "Redo"
+menu_btns_text[5] = "Cut"
+menu_btns_text[6] = "Copy"
+menu_btns_text[7] = "Clear"
+menu_btns_text[8] = "Paste"
+menu_btns_text[9] = "Play"
+menu_btns_text[10] = "Options"
+menu_btns_text[11] = "Config"
 
-menu_btns_text[5].cb = {
+menu_btns_bg[0] = nord10
+menu_btns_bg[1] = nord10
+menu_btns_bg[2] = nord10
+menu_btns_bg[3] = nord9
+menu_btns_bg[4] = nord9
+menu_btns_bg[5] = nord7
+menu_btns_bg[6] = nord7
+menu_btns_bg[7] = nord7
+menu_btns_bg[8] = nord7
+menu_btns_bg[9] = nord8
+menu_btns_bg[10] = nord8
+menu_btns_bg[11] = nord8
+
+menu_btns_text[11].cb = {
     prefs_dialog()
 }
 
 $i = 0
-while ($i < 6) {
+while ($i < 12) {
     $w = get_text_xsize(menu_btns_text[$i]) + 12
     menu_btns[$i] =
-        add_btn(0, 0, $w, 19, menu_btns_text[$i], nord4, nord6, 0x0020,
-        menu_btns_text[$i].cb)
+        add_btn(0, 0, $w, 19, menu_btns_text[$i],
+            menu_btns_bg[$i], nord6, 0xd0ff, menu_btns_text[$i].cb)
     $i + 1
 }
 
@@ -100,13 +120,16 @@ fn on_resize($w, $h) {
     $i = 0
     while ($i < 16) {
         track_btns[$i].x = -$w div 2
-        track_btns[$i].y = -$h div 2 + ($i + 1) * 19
+        track_btns[$i].y = -$h div 2 + ($i + 1) * 19 + ($i >= 8)
         $i + 1
     }
 
     $i = 0
     $x = -$w div 2 + 19
-    while ($i < 6) {
+    while ($i < 12) {
+        if ($i == 0 || menu_btns_bg[$i] != menu_btns_bg[$i - 1]) {
+            $x + 1
+        }
         menu_btns[$i].x = $x
         menu_btns[$i].y = -$h div 2
         $x + menu_btns[$i].w
