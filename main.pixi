@@ -46,13 +46,11 @@ while ($i < 16) {
     $s = new(1, 1, INT8)
     if ($i < 8) {
         num_to_str($s, $i + 1)
-        $c = track_colours[$i]
     } else {
         $s[0] = track_hotkeys[$i - 8]
-        $c = get_blend(track_colours[$i - 8], track_colours[($i + 1) % 8], 128)
     }
     track_btns[$i] =
-        add_btn(0, 0, 19, 19, $s, $c, nord6, 0xd0ff, switch_track_cb)
+        add_btn(0, 0, 19, 19, $s, track_colours[$i], nord6, 0xd0ff, switch_track_cb)
     track_btns[$i].track_idx = $i
     $i + 1
 }

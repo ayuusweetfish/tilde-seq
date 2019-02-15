@@ -150,6 +150,13 @@ track_colours[5] = nord10
 track_colours[6] = nord15
 track_colours[7] = nord4
 
+$i = 8
+while ($i < 16) {
+    track_colours[$i] =
+        get_blend(track_colours[$i - 8], track_colours[($i + 1) % 8], 128)
+    $i + 1
+}
+
 // A simple cache-like thing
 roll_tid = 0
 roll_notes = roll_tracks[0]
