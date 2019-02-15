@@ -42,7 +42,7 @@ fn roll_mouse_down($x, $y) {
             if (roll_shift == 1) {
                 roll_sside = roll_sfin
             }
-            roll_sfin = (roll_px + $x - roll_x) div CELL_WIDTH
+            roll_sfin = floor((roll_px + $x - roll_x) / CELL_WIDTH)
             if (roll_shift == 0) {
                 roll_sside = roll_sfin
             }
@@ -52,8 +52,8 @@ fn roll_mouse_down($x, $y) {
                 roll_mx = roll_px + $x
                 roll_my = roll_py - $y
             } else {
-                roll_mx = (roll_px + $x - roll_x) div CELL_WIDTH
-                roll_my = (roll_py - $y + roll_y) div CELL_HEIGHT
+                roll_mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
+                roll_my = floor((roll_py - $y + roll_y) / CELL_HEIGHT)
                 roll_locate_note(roll_mx, roll_my)
                 if (roll_editing == -1) {
                     roll_editing = add_note(roll_mx, roll_my, 1)
@@ -74,11 +74,11 @@ fn roll_mouse_move($x, $y) {
         roll_py = roll_my + $y
     }
     if (roll_selecting) {
-        roll_sfin = (roll_px + $x - roll_x) div CELL_WIDTH
+        roll_sfin = floor((roll_px + $x - roll_x) / CELL_WIDTH)
     }
     if (roll_editing != -1) {
-        $mx = (roll_px + $x - roll_x) div CELL_WIDTH
-        $my = (roll_py - $y + roll_y) div CELL_HEIGHT
+        $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
+        $my = floor((roll_py - $y + roll_y) / CELL_HEIGHT)
         if (roll_eside == -1) {
             roll_editing.x = roll_mx + $mx
         } else {
