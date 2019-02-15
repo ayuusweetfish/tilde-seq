@@ -37,8 +37,25 @@ include "roll.pixi"
 track_btns = new(16)
 track_hotkeys = "QWERTYUI"
 
+fn update_track_btns() {
+    $i = 0
+    while ($i < 16) {
+        if (roll_track_sel & (1 << $i)) {
+            track_btns[$i].alphas = 0xf8c0
+            track_btns[$i].fg = nord6
+        } else {
+            track_btns[$i].alphas = 0xd0ff
+            track_btns[$i].fg = nord0
+        }
+        $i + 1
+    }
+}
+
 fn switch_track_cb($sender) {
     switch_track($sender.track_idx)
+    update_track_btns()
+    // roll_changed is set to 1 in switch_track()
+    // so the screen will be redrawn
 }
 
 $i = 0
@@ -50,10 +67,12 @@ while ($i < 16) {
         $s[0] = track_hotkeys[$i - 8]
     }
     track_btns[$i] =
-        add_btn(0, 0, 19, 19, $s, track_colours[$i], nord6, 0xd0ff, switch_track_cb)
+        add_btn(0, 0, 19, 19, $s, track_colours[$i], nord6, 0, switch_track_cb)
     track_btns[$i].track_idx = $i
     $i + 1
 }
+
+update_track_btns()
 
 menu_btns = new(12)
 menu_btns_text = new(12)
@@ -174,6 +193,7 @@ while (running) {
             }
             if ($t != -1) {
                 switch_track($t)
+                update_track_btns()
             }
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
