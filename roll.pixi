@@ -40,6 +40,8 @@ fn roll_mouse_up($x, $y) {
     roll_activated = 0
 }
 
+roll_bar = 9
+roll_beat = 3
 roll_notes = new(16, 1, INT)
 roll_note_cnt = 0
 
@@ -62,6 +64,44 @@ fn draw_roll() {
     $y_sta = floor(roll_py / CELL_HEIGHT)
     $y_fin = ceil((roll_py + roll_h) / CELL_HEIGHT)
 
+    $i = $y_sta
+    while $i <= $y_fin {
+        $ly = roll_y + $i * CELL_HEIGHT - roll_py
+        $pc = 11 - $i % 12
+        if ($pc == 1 || $pc == 3 || $pc == 6 || $pc == 8 || $pc == 10) {
+            fbox(roll_x, $ly, roll_w, CELL_HEIGHT, nord0)
+        }
+        if ($pc != 0) {
+            line(roll_x, $ly, roll_x + roll_w, $ly, nord2)
+        }
+        $i + 1
+    }
+
+    $i = $x_sta
+    while $i <= $x_fin {
+        $lx = roll_x + $i * CELL_WIDTH - roll_px
+        if ($i % roll_bar == 0) {
+            line($lx, roll_y, $lx, roll_y + roll_h, nord9)
+        } else {
+            if ($i % roll_beat == 0) {
+                line($lx, roll_y, $lx, roll_y + roll_h, nord3)
+            } else {
+                line($lx, roll_y, $lx, roll_y + roll_h, nord2)
+            }
+        }
+        $i + 1
+    }
+
+    $i = $y_sta
+    while $i <= $y_fin {
+        $ly = roll_y + $i * CELL_HEIGHT - roll_py
+        if ($i % 12 == 0) {
+            line(roll_x, $ly, roll_x + roll_w, $ly, nord10)
+        }
+        $i + 1
+    }
+
+    transp(256)
     $i = 0
     while ($i < roll_note_cnt) {
         $n = roll_notes[$i]

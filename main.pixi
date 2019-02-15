@@ -47,10 +47,10 @@ add_btn(-120, 0, 50, 30, "OxO", nord13, nord5, 0x80a0, {
     printf("DDD\n")
 })
 
-roll_x = 50
+roll_x = -150
 roll_y = -100
-roll_w = 100
-roll_h = 150
+roll_w = 300
+roll_h = 200
 add_note(0, 0, 3)
 add_note(0, 2, 1)
 add_note(1, 4, 16)
@@ -66,7 +66,6 @@ fn draw() {
 
     s = ""
     sprintf(s, "Hello world!\n%d x %d\nFPS: %.2lf", xsize, ysize, frames / get_timer(0) * 1000)
-    print(s, -xsize / 2, -ysize / 2, #d8dee9)
     print(s, 0, 0, nord4)
 
     sprintf(special_btn.text, "OvO %d", xsize)
