@@ -16,8 +16,12 @@ roll_py = 48 * CELL_HEIGHT
 
 roll_ctrl = 0
 roll_activated = 0
+
+roll_moving = 0
 roll_mx = -1
 roll_my = -1
+roll_editing = -1
+
 roll_changed = 0
 
 fn roll_mouse_down($x, $y) {
@@ -25,15 +29,35 @@ fn roll_mouse_down($x, $y) {
         $y >= roll_y && $y < roll_y + roll_h)
     {
         roll_activated = 1
-        roll_mx = roll_px + $x
-        roll_my = roll_py - $y
+        roll_moving = roll_ctrl
+        if (roll_moving) {
+            roll_mx = roll_px + $x
+            roll_my = roll_py - $y
+        } else {
+            roll_mx = (roll_px + $x - roll_x) div CELL_WIDTH
+            roll_my = (roll_py - $y + roll_y) div CELL_HEIGHT
+            roll_editing = add_note(roll_mx, roll_my, 1)
+            roll_changed = 1
+        }
     }
 }
 
 fn roll_mouse_move($x, $y) {
     if (roll_activated == 0) { ret }
-    roll_px = roll_mx - $x
-    roll_py = roll_my + $y
+    if (roll_moving) {
+        roll_px = roll_mx - $x
+        roll_py = roll_my + $y
+    } else {
+        $mx = (roll_px + $x - roll_x) div CELL_WIDTH
+        $my = (roll_py - $y + roll_y) div CELL_HEIGHT
+        if ($mx >= roll_mx) {
+            roll_editing.x = roll_mx
+            roll_editing.len = $mx - roll_mx + 1
+        } else {
+            roll_editing.x = $mx
+            roll_editing.len = roll_mx - $mx + 1
+        }
+    }
     roll_changed = 1
 }
 
