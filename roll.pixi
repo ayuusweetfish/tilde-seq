@@ -157,6 +157,9 @@ while ($i < 16) {
     $i + 1
 }
 
+// Mask of selected tracks
+roll_track_sel = 1
+
 // A simple cache-like thing
 roll_tid = 0
 roll_notes = roll_tracks[0]
@@ -166,6 +169,8 @@ roll_colour = track_colours[0]
 fn switch_track($t) {
     // Delayed writeback
     roll_tracks[roll_tid].cnt = roll_note_cnt
+
+    roll_track_sel = (1 << $t)
 
     roll_tid = $t
     roll_notes = roll_tracks[$t]
@@ -241,6 +246,28 @@ fn roll_monophonize($m) {
     }
 }
 
+fn draw_track($t, $x_sta, $x_fin, $y_sta, $y_fin) {
+    $cnt = roll_tracks[$t].cnt
+    $i = 0
+    $col = track_colours[$t]
+
+    while ($i < $cnt) {
+        $n = roll_tracks[$t][$i]
+
+        if ($n.x <= $x_fin && $n.x + $n.len - 1 >= $x_sta &&
+            $n.y >= $y_sta && $n.y <= $y_fin)
+        {
+            fbox(roll_x + $n.x * CELL_WIDTH - roll_px + 1,
+                roll_y - ($n.y + 1) * CELL_HEIGHT + roll_py,
+                CELL_WIDTH * $n.len - 1,
+                CELL_HEIGHT,
+                $col)
+        }
+
+        $i + 1
+    }
+}
+
 fn draw_roll() {
     roll_clamp_p()
     fbox(roll_x, roll_y, roll_w, roll_h, nord1)
@@ -288,22 +315,26 @@ fn draw_roll() {
         $i + 1
     }
 
-    transp(256)
-    $i = 0
-    while ($i < roll_note_cnt) {
-        $n = roll_notes[$i]
+    roll_tracks[roll_tid].cnt = roll_note_cnt
 
-        if ($n.x <= $x_fin && $n.x + $n.len - 1 >= $x_sta &&
-            $n.y >= $y_sta && $n.y <= $y_fin)
-        {
-            fbox(roll_x + $n.x * CELL_WIDTH - roll_px + 1,
-                roll_y - ($n.y + 1) * CELL_HEIGHT + roll_py,
-                CELL_WIDTH * $n.len - 1,
-                CELL_HEIGHT,
-                roll_colour)
+    // Unselected tracks
+    transp(64)
+    $i = 15
+    while ($i >= 0) {
+        if ((roll_track_sel & (1 << $i)) == 0) {
+            draw_track($i, $x_sta, $x_fin, $y_sta, $y_fin)
         }
+        $i - 1
+    }
 
-        $i + 1
+    // Selected tracks
+    transp(256)
+    $i = 15
+    while ($i >= 0) {
+        if ((roll_track_sel & (1 << $i)) != 0) {
+            draw_track($i, $x_sta, $x_fin, $y_sta, $y_fin)
+        }
+        $i - 1
     }
 
     $s = ""

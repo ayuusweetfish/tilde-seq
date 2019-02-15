@@ -159,6 +159,23 @@ while (running) {
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONDOWN) {
             if (EVT[EVT_FLAGS] & EVT_FLAG_CTRL) { roll_ctrl = 1 }
+            $t = -1
+            if (EVT[EVT_KEY] >= '1' && EVT[EVT_KEY] <= '8') {
+                $t = EVT[EVT_KEY] - '1'
+            }
+            $i = 0
+            while ($i < 8) {
+                // +32 for converting upper case to lower case
+                if (EVT[EVT_KEY] == track_hotkeys[$i] + 32) {
+                    $t = 8 + $i
+                    break
+                }
+                $i + 1
+            }
+            if ($t != -1) {
+                switch_track($t)
+                changed = 1
+            }
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
             if ((EVT[EVT_FLAGS] & EVT_FLAG_CTRL) == 0) { roll_ctrl = 0 }
