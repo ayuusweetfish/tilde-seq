@@ -10,6 +10,7 @@ roll_x = 0
 roll_y = 0
 roll_w = -1
 roll_h = -1
+roll_sel_h = 12
 
 roll_px = 0
 roll_py = 48 * CELL_HEIGHT
@@ -21,7 +22,11 @@ roll_moving = 0
 roll_mx = -1
 roll_my = -1
 roll_editing = -1
-roll_eside = -1 // X coordinate of a fixed side; -1 if moving
+roll_eside = -1 // X coordinate of a fixed side for editing; -1 if moving
+
+roll_selecting = 0
+roll_sside = 0  // X coordinate of a fixed side for selection
+roll_sfin = 0   // other side
 
 roll_changed = 0
 
@@ -30,21 +35,28 @@ fn roll_mouse_down($x, $y) {
         $y >= roll_y && $y < roll_y + roll_h)
     {
         roll_activated = 1
-        roll_moving = roll_ctrl
-        if (roll_moving) {
-            roll_mx = roll_px + $x
-            roll_my = roll_py - $y
-        } else {
-            roll_mx = (roll_px + $x - roll_x) div CELL_WIDTH
-            roll_my = (roll_py - $y + roll_y) div CELL_HEIGHT
-            roll_locate_note(roll_mx, roll_my)
-            if (roll_editing == -1) {
-                roll_editing = add_note(roll_mx, roll_my, 1)
-                roll_eside = roll_mx
-            } else {
-                roll_mx = roll_editing.x - roll_mx
-            }
+        if ($y < roll_y + roll_sel_h) {
+            roll_selecting = 1
             roll_changed = 1
+            roll_sside = (roll_px + $x - roll_x) div CELL_WIDTH
+            roll_sfin = roll_sside
+        } else {
+            roll_moving = roll_ctrl
+            if (roll_moving) {
+                roll_mx = roll_px + $x
+                roll_my = roll_py - $y
+            } else {
+                roll_mx = (roll_px + $x - roll_x) div CELL_WIDTH
+                roll_my = (roll_py - $y + roll_y) div CELL_HEIGHT
+                roll_locate_note(roll_mx, roll_my)
+                if (roll_editing == -1) {
+                    roll_editing = add_note(roll_mx, roll_my, 1)
+                    roll_eside = roll_mx
+                } else {
+                    roll_mx = roll_editing.x - roll_mx
+                }
+                roll_changed = 1
+            }
         }
     }
 }
@@ -54,7 +66,11 @@ fn roll_mouse_move($x, $y) {
     if (roll_moving) {
         roll_px = roll_mx - $x
         roll_py = roll_my + $y
-    } else {
+    }
+    if (roll_selecting) {
+        roll_sfin = (roll_px + $x - roll_x) div CELL_WIDTH
+    }
+    if (roll_editing != -1) {
         $mx = (roll_px + $x - roll_x) div CELL_WIDTH
         $my = (roll_py - $y + roll_y) div CELL_HEIGHT
         if (roll_eside == -1) {
@@ -78,10 +94,13 @@ fn roll_mouse_move($x, $y) {
 fn roll_mouse_up($x, $y) {
     if (roll_activated == 0) { ret }
     roll_activated = 0
-    if (roll_moving == 0) {
+    if (roll_editing != -1) {
         roll_monophonize(roll_editing)
         roll_changed = 1
     }
+    roll_moving = 0
+    roll_selecting = 0
+    roll_editing = -1
 }
 
 fn roll_mouse_scrollup($x, $y) {
@@ -356,6 +375,26 @@ fn draw_roll() {
         $i + 1
     }
 
+    // Selection range
+    transp(128)
+    fbox(roll_x, roll_y, roll_w, roll_sel_h, nord4)
+
+    $x1 = roll_sside
+    $x2 = roll_sfin
+    if ($x1 > $x2) {
+        $t = $x1
+        $x1 = $x2
+        $x2 = $t
+    }
+    transp(255)
+    fbox(roll_x + $x1 * CELL_WIDTH - roll_px, roll_y,
+        ($x2 - $x1 + 1) * CELL_WIDTH, roll_sel_h, nord9)
+    transp(64)
+    fbox(roll_x + $x1 * CELL_WIDTH - roll_px, roll_y + roll_sel_h,
+        ($x2 - $x1 + 1) * CELL_WIDTH, roll_h - roll_sel_h, nord9)
+
+    // Bar number
+    transp(255)
     $i = $x_sta
     while $i <= $x_fin {
         $lx = roll_x + $i * CELL_WIDTH - roll_px
