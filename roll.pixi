@@ -4,7 +4,7 @@
 
 CELL_HEIGHT = 8
 CELL_WIDTH = 13
-MAX_TICKS = 99
+MAX_TICKS = 990
 
 roll_x = 0
 roll_y = 0
@@ -41,12 +41,42 @@ fn roll_mouse_up($x, $y) {
     roll_activated = 0
 }
 
-fn roll_clamp_p() {
-    if (roll_px < 0) {
-        roll_px = 0
+fn roll_mouse_scrollup($x, $y) {
+    if ($x >= roll_x && $x < roll_x + roll_w &&
+        $y >= roll_y && $y < roll_y + roll_h)
+    {
+        if (roll_ctrl == 1 && CELL_HEIGHT > 3) {
+            CELL_HEIGHT - 0.25
+            roll_changed = 1
+        }
+        if (roll_ctrl == 0 && CELL_WIDTH > 2) {
+            CELL_WIDTH - 0.25
+            roll_changed = 1
+        }
     }
+}
+
+fn roll_mouse_scrolldown($x, $y) {
+    if ($x >= roll_x && $x < roll_x + roll_w &&
+        $y >= roll_y && $y < roll_y + roll_h)
+    {
+        if (roll_ctrl == 1 && CELL_HEIGHT < 8) {
+            CELL_HEIGHT + 0.25
+            roll_changed = 1
+        }
+        if (roll_ctrl == 0 && CELL_WIDTH < 13) {
+            CELL_WIDTH + 0.25
+            roll_changed = 1
+        }
+    }
+}
+
+fn roll_clamp_p() {
     if (roll_px > MAX_TICKS * CELL_WIDTH - roll_w) {
         roll_px = MAX_TICKS * CELL_WIDTH - roll_w
+    }
+    if (roll_px < 0) {
+        roll_px = 0
     }
     if (roll_py > 128 * CELL_HEIGHT) {
         roll_py = 128 * CELL_HEIGHT
@@ -144,7 +174,7 @@ fn draw_roll() {
         $ly = roll_y - ($i + 1) * CELL_HEIGHT + roll_py
         if ($i % 12 == 0) {
             num_to_str($s, $i div 12)
-            print($s, roll_x + 1, $ly + 1, nord4, TOP | LEFT)
+            print($s, roll_x + 1, $ly + CELL_HEIGHT + 1, nord4, BOTTOM | LEFT)
         }
         $i + 1
     }
@@ -152,7 +182,9 @@ fn draw_roll() {
     $i = $x_sta
     while $i <= $x_fin {
         $lx = roll_x + $i * CELL_WIDTH - roll_px
-        if ($i % roll_bar == 0) {
+        if ($i % roll_bar == 0 &&
+            (CELL_WIDTH >= 4 || $i % (roll_bar * 2) == 0))
+        {
             num_to_str($s, $i div roll_bar)
             print($s, $lx + 1, roll_y + 1, nord5, TOP | LEFT)
         }

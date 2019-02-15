@@ -161,9 +161,17 @@ while (running) {
             if (EVT[EVT_KEY] == KEY_CTRL) { roll_ctrl - 1 }
         }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONDOWN) {
-            btn_mouse_down(EVT[EVT_X], EVT[EVT_Y])
-            roll_mouse_down(EVT[EVT_X], EVT[EVT_Y])
-            is_down = 1
+            if (EVT[EVT_KEY] == KEY_MOUSE_SCROLLUP) {
+                roll_mouse_scrollup(EVT[EVT_X], EVT[EVT_Y])
+            } else {
+                if (EVT[EVT_KEY] == KEY_MOUSE_SCROLLDOWN) {
+                    roll_mouse_scrolldown(EVT[EVT_X], EVT[EVT_Y])
+                } else {
+                    btn_mouse_down(EVT[EVT_X], EVT[EVT_Y])
+                    roll_mouse_down(EVT[EVT_X], EVT[EVT_Y])
+                    is_down = 1
+                }
+            }
         }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONUP) {
             btn_mouse_up(EVT[EVT_X], EVT[EVT_Y])
