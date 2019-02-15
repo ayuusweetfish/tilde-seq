@@ -163,19 +163,11 @@ roll_track_sel = 1
 // A simple cache-like thing
 roll_tid = 0
 roll_notes = roll_tracks[0]
-roll_note_cnt = 0
-roll_colour = track_colours[0]
 
 fn switch_track($t) {
-    // Delayed writeback
-    roll_tracks[roll_tid].cnt = roll_note_cnt
-
     roll_track_sel = (1 << $t)
-
     roll_tid = $t
     roll_notes = roll_tracks[$t]
-    roll_note_cnt = roll_tracks[$t].cnt
-    roll_colour = track_colours[$t]
 }
 
 fn add_note($x, $y, $len) {
@@ -184,23 +176,24 @@ fn add_note($x, $y, $len) {
     $n.y = $y
     $n.len = $len
 
-    roll_notes[roll_note_cnt] = $n
-    roll_note_cnt + 1
+    roll_notes[roll_tracks[roll_tid].cnt] = $n
+    roll_tracks[roll_tid].cnt + 1
     ret($n)
 }
 
 fn remove_note($i) {
     remove(roll_notes[$i])
-    roll_note_cnt - 1
-    roll_notes[$i] = roll_notes[roll_note_cnt]
+    roll_tracks[roll_tid].cnt - 1
+    roll_notes[$i] = roll_notes[roll_tracks[roll_tid].cnt]
 }
 
 // Finds whether a note exists at cell (x, y)
 // and updates global variables <roll_editing> and <roll_eside>
 fn roll_locate_note($x, $y) {
+    $cnt = roll_tracks[roll_tid].cnt
     $i = 0
     roll_editing = -1
-    while ($i < roll_note_cnt) {
+    while ($i < $cnt) {
         $n = roll_notes[$i]
         if ($n.y == $y && $n.x <= $x && $n.x + $n.len > $x) {
             roll_editing = $n
@@ -215,8 +208,9 @@ fn roll_locate_note($x, $y) {
 
 // Make the track monophonic w.r.t. a given newly-added note
 fn roll_monophonize($m) {
+    $cnt = roll_tracks[roll_tid].cnt
     $i = 0
-    while ($i < roll_note_cnt) {
+    while ($i < $cnt) {
         $n = roll_notes[$i]
         if ($n != $m && $n.x + $n.len > $m.x && $m.x + $m.len > $n.x) {
             if ($n.x < $m.x) {
@@ -314,8 +308,6 @@ fn draw_roll() {
         }
         $i + 1
     }
-
-    roll_tracks[roll_tid].cnt = roll_note_cnt
 
     // Unselected tracks
     transp(64)
