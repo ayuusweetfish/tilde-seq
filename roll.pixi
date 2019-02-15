@@ -2,8 +2,9 @@
 // Ctrl + drag: Pan
 // Ctrl + scroll: Zoom
 
-CELL_HEIGHT = 6
-CELL_WIDTH = 10
+CELL_HEIGHT = 8
+CELL_WIDTH = 13
+MAX_TICKS = 99
 
 roll_x = 0
 roll_y = 0
@@ -11,7 +12,7 @@ roll_w = -1
 roll_h = -1
 
 roll_px = 0
-roll_py = 0
+roll_py = 48 * CELL_HEIGHT
 
 roll_ctrl = 0
 roll_activated = 0
@@ -20,19 +21,31 @@ roll_my = -1
 roll_changed = 0
 
 fn roll_mouse_down($x, $y) {
-    if ($x >= roll_x && $x <= roll_x + roll_w &&
-        $y >= roll_y && $y <= roll_y + roll_h)
+    if ($x >= roll_x && $x < roll_x + roll_w &&
+        $y >= roll_y && $y < roll_y + roll_h)
     {
         roll_activated = 1
         roll_mx = roll_px + $x
-        roll_my = roll_py + $y
+        roll_my = roll_py - $y
     }
 }
 
 fn roll_mouse_move($x, $y) {
     if (roll_activated == 0) { ret }
     roll_px = roll_mx - $x
-    roll_py = roll_my - $y
+    roll_py = roll_my + $y
+    if (roll_px < 0) {
+        roll_px = 0
+    }
+    if (roll_px > MAX_TICKS * CELL_WIDTH - roll_w) {
+        roll_px = MAX_TICKS * CELL_WIDTH - roll_w
+    }
+    if (roll_py > 128 * CELL_HEIGHT) {
+        roll_py = 128 * CELL_HEIGHT
+    }
+    if (roll_py < roll_h - 1) {
+        roll_py = roll_h - 1
+    }
     roll_changed = 1
 }
 
@@ -61,18 +74,18 @@ fn draw_roll() {
 
     $x_sta = floor(roll_px / CELL_WIDTH)
     $x_fin = ceil((roll_px + roll_w) / CELL_WIDTH)
-    $y_sta = floor(roll_py / CELL_HEIGHT)
-    $y_fin = ceil((roll_py + roll_h) / CELL_HEIGHT)
+    $y_sta = floor((roll_py - roll_h) / CELL_HEIGHT)
+    $y_fin = floor(roll_py / CELL_HEIGHT)
 
     $i = $y_sta
     while $i <= $y_fin {
-        $ly = roll_y + $i * CELL_HEIGHT - roll_py
-        $pc = 11 - $i % 12
+        $ly = roll_y - ($i + 1) * CELL_HEIGHT + roll_py
+        $pc = $i % 12
         if ($pc == 1 || $pc == 3 || $pc == 6 || $pc == 8 || $pc == 10) {
             fbox(roll_x, $ly, roll_w, CELL_HEIGHT, nord0)
         }
         if ($pc != 0) {
-            line(roll_x, $ly, roll_x + roll_w, $ly, nord2)
+            line(roll_x, $ly, roll_x + roll_w - 1, $ly, nord2)
         }
         $i + 1
     }
@@ -84,9 +97,9 @@ fn draw_roll() {
             line($lx, roll_y, $lx, roll_y + roll_h, nord9)
         } else {
             if ($i % roll_beat == 0) {
-                line($lx, roll_y, $lx, roll_y + roll_h, nord3)
+                line($lx, roll_y, $lx, roll_y + roll_h - 1, nord3)
             } else {
-                line($lx, roll_y, $lx, roll_y + roll_h, nord2)
+                line($lx, roll_y, $lx, roll_y + roll_h - 1, nord2)
             }
         }
         $i + 1
@@ -94,9 +107,10 @@ fn draw_roll() {
 
     $i = $y_sta
     while $i <= $y_fin {
-        $ly = roll_y + $i * CELL_HEIGHT - roll_py
+        $ly = roll_y - ($i + 1) * CELL_HEIGHT + roll_py
         if ($i % 12 == 0) {
-            line(roll_x, $ly, roll_x + roll_w, $ly, nord10)
+            line(roll_x, $ly + CELL_HEIGHT,
+                roll_x + roll_w - 1, $ly + CELL_HEIGHT, nord10)
         }
         $i + 1
     }
@@ -109,13 +123,35 @@ fn draw_roll() {
         if ($n.x <= $x_fin && $n.x + $n.len - 1 >= $x_sta &&
             $n.y >= $y_sta && $n.y <= $y_fin)
         {
-            fbox(roll_x + $n.x * CELL_WIDTH - roll_px,
-                roll_y + $n.y * CELL_HEIGHT - roll_py,
-                CELL_WIDTH * $n.len,
+            fbox(roll_x + $n.x * CELL_WIDTH - roll_px + 1,
+                roll_y - ($n.y + 1) * CELL_HEIGHT + roll_py,
+                CELL_WIDTH * $n.len - 1,
                 CELL_HEIGHT,
                 nord12)
         }
 
+        $i + 1
+    }
+
+    $s = ""
+
+    $i = $y_sta
+    while $i <= $y_fin {
+        $ly = roll_y - ($i + 1) * CELL_HEIGHT + roll_py
+        if ($i % 12 == 0) {
+            num_to_str($s, $i div 12)
+            print($s, roll_x + 1, $ly + 1, nord4, TOP | LEFT)
+        }
+        $i + 1
+    }
+
+    $i = $x_sta
+    while $i <= $x_fin {
+        $lx = roll_x + $i * CELL_WIDTH - roll_px
+        if ($i % roll_bar == 0) {
+            num_to_str($s, $i div roll_bar)
+            print($s, $lx + 1, roll_y + 1, nord5, TOP | LEFT)
+        }
         $i + 1
     }
 }
