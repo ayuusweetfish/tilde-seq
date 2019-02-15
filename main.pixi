@@ -178,6 +178,7 @@ while (running) {
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONDOWN) {
             if (EVT[EVT_FLAGS] & EVT_FLAG_CTRL) { roll_ctrl = 1 }
+            if (EVT[EVT_FLAGS] & EVT_FLAG_SHIFT) { roll_shift = 1 }
             $t = -1
             if (EVT[EVT_KEY] >= '1' && EVT[EVT_KEY] <= '8') {
                 $t = EVT[EVT_KEY] - '1'
@@ -198,6 +199,7 @@ while (running) {
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
             if ((EVT[EVT_FLAGS] & EVT_FLAG_CTRL) == 0) { roll_ctrl = 0 }
+            if ((EVT[EVT_FLAGS] & EVT_FLAG_SHIFT) == 0) { roll_shift = 0 }
         }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONDOWN) {
             if (EVT[EVT_KEY] == KEY_MOUSE_SCROLLUP) {

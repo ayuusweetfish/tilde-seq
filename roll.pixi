@@ -16,6 +16,7 @@ roll_px = 0
 roll_py = 48 * CELL_HEIGHT
 
 roll_ctrl = 0
+roll_shift = 0
 roll_activated = 0
 
 roll_moving = 0
@@ -38,8 +39,13 @@ fn roll_mouse_down($x, $y) {
         if ($y < roll_y + roll_sel_h) {
             roll_selecting = 1
             roll_changed = 1
-            roll_sside = (roll_px + $x - roll_x) div CELL_WIDTH
-            roll_sfin = roll_sside
+            if (roll_shift == 1) {
+                roll_sside = roll_sfin
+            }
+            roll_sfin = (roll_px + $x - roll_x) div CELL_WIDTH
+            if (roll_shift == 0) {
+                roll_sside = roll_sfin
+            }
         } else {
             roll_moving = roll_ctrl
             if (roll_moving) {
