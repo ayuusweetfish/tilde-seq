@@ -34,18 +34,56 @@ start_timer(0)
 include "buttons.pixi"
 include "roll.pixi"
 
-add_btn(-120, -90, 50, 30, "OuO", nord4, nord5, 0x203d, {
-    printf("AAA\n")
-})
-special_btn = add_btn(-120, -60, 50, 30, "OvO", nord4, nord5, 0x203d, {
-    printf("BBB\n")
-})
-add_btn(-120, -30, 50, 30, "OwO", nord12, nord5, 0x80a0, {
-    printf("CCC\n")
-})
-add_btn(-120, 0, 50, 30, "OxO", nord13, nord5, 0x80a0, {
-    printf("DDD\n")
-})
+track_colours = new(16)
+track_btns = new(16)
+
+track_colours[0] = nord11
+track_colours[1] = nord12
+track_colours[2] = nord13
+track_colours[3] = nord14
+track_colours[4] = nord8
+track_colours[5] = nord10
+track_colours[6] = nord15
+track_colours[7] = nord4
+track_hotkeys = "QWERTYUI"
+
+$i = 0
+while ($i < 16) {
+    $s = new(1, 1, INT8)
+    if ($i < 8) {
+        num_to_str($s, $i + 1)
+        $c = track_colours[$i]
+    } else {
+        $s[0] = track_hotkeys[$i - 8]
+        $c = get_blend(track_colours[$i - 8], track_colours[($i + 1) % 8], 128)
+    }
+    track_btns[$i] =
+        add_btn(0, 0, 19, 19, $s, $c, nord6, 0xd0ff, {})
+    $i + 1
+}
+
+menu_btns = new(8)
+menu_btns_text = new(8)
+
+menu_btns_text[0] = "New"
+menu_btns_text[1] = "Open"
+menu_btns_text[2] = "Save"
+menu_btns_text[3] = "Play"
+menu_btns_text[4] = "Options"
+menu_btns_text[5] = "Config"
+
+menu_btns_text[5].cb = {
+    prefs_dialog()
+}
+
+$i = 0
+while ($i < 6) {
+    $w = get_text_xsize(menu_btns_text[$i]) + 12
+    menu_btns[$i] =
+        add_btn(0, 0, $w, 19, menu_btns_text[$i], nord4, nord6, 0x0020,
+        menu_btns_text[$i].cb)
+    $i + 1
+}
 
 roll_x = -200
 roll_y = -150
@@ -58,21 +96,34 @@ add_note(1, 4, 16)
 add_note(1, 6, 36)
 add_note(9, 60, 10)
 
+fn on_resize($w, $h) {
+    $i = 0
+    while ($i < 16) {
+        track_btns[$i].x = -$w div 2
+        track_btns[$i].y = -$h div 2 + ($i + 1) * 19
+        $i + 1
+    }
+
+    $i = 0
+    $x = -$w div 2 + 19
+    while ($i < 6) {
+        menu_btns[$i].x = $x
+        menu_btns[$i].y = -$h div 2
+        $x + menu_btns[$i].w
+        $i + 1
+    }
+
+    roll_x = -$w div 2 + 19
+    roll_y = -$h div 2 + 19
+    roll_w = $w - 19
+    roll_h = $h - 19
+}
+
 fn draw() {
-    transp(255)
-    clear(nord0)
-
-    scr = get_screen()
-    xsize = get_xsize(scr)
-    ysize = get_ysize(scr)
-
-    s = ""
-    sprintf(s, "Hello world!\n%d x %d\nFPS: %.2lf", xsize, ysize, frames / get_timer(0) * 1000)
-    print(s, -xsize / 2, -ysize / 2, #d8dee9)
-
-    sprintf(special_btn.text, "OvO %d", xsize)
-
     draw_roll()
+    transp(255)
+    fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, 19, WINDOW_YSIZE, nord0)
+    fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, WINDOW_XSIZE, 19, nord0)
     draw_btns()
 }
 
@@ -83,6 +134,7 @@ while (running) {
         resize(scr, WINDOW_XSIZE, WINDOW_YSIZE)
         last_xsize = WINDOW_XSIZE
         last_ysize = WINDOW_YSIZE
+        on_resize(WINDOW_XSIZE, WINDOW_YSIZE)
         changed = 1
     }
 

@@ -1,4 +1,4 @@
-btns = new(16)
+btns = new(128)
 btns_cnt = 0
 
 btn_sel_id = -1
@@ -34,8 +34,8 @@ fn draw_btns() {
         fbox($cur.x, $cur.y, $cur.w, $cur.h, $cur.bg)
         transp(255)
         print($cur.text,
-            $cur.x + $cur.w / 2,
-            $cur.y + $cur.h / 2,
+            $cur.x + $cur.w div 2 + 1,
+            $cur.y + $cur.h div 2 + 1,
             $cur.fg)
         $i + 1
     }

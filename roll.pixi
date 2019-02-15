@@ -34,6 +34,14 @@ fn roll_mouse_move($x, $y) {
     if (roll_activated == 0) { ret }
     roll_px = roll_mx - $x
     roll_py = roll_my + $y
+    roll_changed = 1
+}
+
+fn roll_mouse_up($x, $y) {
+    roll_activated = 0
+}
+
+fn roll_clamp_p() {
     if (roll_px < 0) {
         roll_px = 0
     }
@@ -46,11 +54,6 @@ fn roll_mouse_move($x, $y) {
     if (roll_py < roll_h - 1) {
         roll_py = roll_h - 1
     }
-    roll_changed = 1
-}
-
-fn roll_mouse_up($x, $y) {
-    roll_activated = 0
 }
 
 roll_bar = 9
@@ -70,6 +73,7 @@ fn add_note($x, $y, $len) {
 }
 
 fn draw_roll() {
+    roll_clamp_p()
     fbox(roll_x, roll_y, roll_w, roll_h, nord1)
 
     $x_sta = floor(roll_px / CELL_WIDTH)
