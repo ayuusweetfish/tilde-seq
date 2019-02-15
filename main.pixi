@@ -175,13 +175,11 @@ while (running) {
         if (EVT[EVT_TYPE] == EVT_QUIT) {
             running = 0
         }
-        // +1 and -1 since <control> and <command> on Mac
-        // are both recognized as KEY_CTRL
         if (EVT[EVT_TYPE] == EVT_BUTTONDOWN) {
-            if (EVT[EVT_KEY] == KEY_CTRL) { roll_ctrl + 1 }
+            if (EVT[EVT_FLAGS] & EVT_FLAG_CTRL) { roll_ctrl = 1 }
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
-            if (EVT[EVT_KEY] == KEY_CTRL) { roll_ctrl - 1 }
+            if ((EVT[EVT_FLAGS] & EVT_FLAG_CTRL) == 0) { roll_ctrl = 0 }
         }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONDOWN) {
             if (EVT[EVT_KEY] == KEY_MOUSE_SCROLLUP) {
