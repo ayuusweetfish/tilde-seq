@@ -21,6 +21,7 @@ roll_moving = 0
 roll_mx = -1
 roll_my = -1
 roll_editing = -1
+roll_eside = -1 // X coordinate of a fixed side; -1 if moving
 
 roll_changed = 0
 
@@ -36,7 +37,14 @@ fn roll_mouse_down($x, $y) {
         } else {
             roll_mx = (roll_px + $x - roll_x) div CELL_WIDTH
             roll_my = (roll_py - $y + roll_y) div CELL_HEIGHT
-            roll_editing = add_note(roll_mx, roll_my, 1)
+            roll_locate_note(roll_mx, roll_my)
+            if (roll_editing == -1) {
+                roll_editing = add_note(roll_mx, roll_my, 1)
+                roll_eside = roll_mx
+            } else {
+                roll_mx = roll_editing.x - roll_mx
+                printf("%d\n", roll_mx)
+            }
             roll_changed = 1
         }
     }
@@ -50,13 +58,20 @@ fn roll_mouse_move($x, $y) {
     } else {
         $mx = (roll_px + $x - roll_x) div CELL_WIDTH
         $my = (roll_py - $y + roll_y) div CELL_HEIGHT
-        if ($mx >= roll_mx) {
-            roll_editing.x = roll_mx
-            roll_editing.len = $mx - roll_mx + 1
+        if (roll_eside == -1) {
+            roll_editing.x = roll_mx + $mx
         } else {
-            roll_editing.x = $mx
-            roll_editing.len = roll_mx - $mx + 1
+            $x1 = $mx
+            $x2 = roll_eside
+            if ($x1 > $x2) {
+                $t = $x1
+                $x1 = $x2
+                $x2 = $t
+            }
+            roll_editing.x = $x1
+            roll_editing.len = $x2 - $x1 + 1
         }
+        roll_editing.y = $my
     }
     roll_changed = 1
 }
@@ -124,6 +139,24 @@ fn add_note($x, $y, $len) {
     roll_notes[roll_note_cnt] = $n
     roll_note_cnt + 1
     ret($n)
+}
+
+// Finds whether a note exists at cell (x, y)
+// and updates global variables <roll_editing> and <roll_eside>
+fn roll_locate_note($x, $y) {
+    $i = 0
+    roll_editing = -1
+    while ($i < roll_note_cnt) {
+        $n = roll_notes[$i]
+        if ($n.y == $y && $n.x <= $x && $n.x + $n.len > $x) {
+            roll_editing = $n
+            roll_eside = -1
+            if ($n.x == $x) { roll_eside = $n.x + $n.len - 1 }
+            if ($n.x + $n.len - 1 == $x) { roll_eside = $n.x }
+            break
+        }
+        $i + 1
+    }
 }
 
 fn draw_roll() {
