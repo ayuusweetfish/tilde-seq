@@ -12,6 +12,9 @@ roll_w = -1
 roll_h = -1
 roll_sel_h = 12
 
+roll_pan_h = 39 // Range for pan is [0, 12] (13 possible values)
+roll_vol_h = 50 // Range for volume is [0, 248]
+
 roll_px = 0
 roll_py = 48 * CELL_HEIGHT
 
@@ -46,7 +49,8 @@ fn roll_mouse_down($x, $y) {
             if (roll_shift == 0) {
                 roll_sside = roll_sfin
             }
-        } else {
+        }
+        if ($y >= roll_y + roll_sel_h && $y < roll_y + roll_h - roll_vol_h - roll_pan_h) {
             roll_moving = roll_ctrl
             if (roll_moving) {
                 roll_mx = roll_px + $x
@@ -62,6 +66,24 @@ fn roll_mouse_down($x, $y) {
                     roll_mx = roll_editing.x - roll_mx
                 }
                 roll_changed = 1
+            }
+        }
+        if ($y >= roll_y + roll_h - roll_vol_h - roll_pan_h &&
+            $y < roll_y + roll_h - roll_vol_h)
+        {
+            roll_moving = roll_ctrl
+            if (roll_moving) {
+                roll_mx = roll_px + $x
+                roll_my = roll_py - $y
+            } else {
+            }
+        }
+        if ($y >= roll_y + roll_h - roll_vol_h) {
+            roll_moving = roll_ctrl
+            if (roll_moving) {
+                roll_mx = roll_px + $x
+                roll_my = roll_py - $y
+            } else {
             }
         }
     }
@@ -418,4 +440,13 @@ fn draw_roll() {
         }
         $i + 1
     }
+
+    // Pan area
+    transp(224)
+    fbox(roll_x, roll_y + roll_h - roll_vol_h - roll_pan_h,
+        roll_w, roll_pan_h, get_blend(nord9, BLACK, 96))
+
+    // Volume area
+    fbox(roll_x, roll_y + roll_h - roll_vol_h,
+        roll_w, roll_vol_h, get_blend(nord7, BLACK, 96))
 }
