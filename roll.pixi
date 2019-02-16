@@ -692,6 +692,12 @@ fn draw_roll() {
     transp(224)
     fbox(roll_x, roll_y + roll_h - roll_vol_h - roll_pan_h,
         roll_w, roll_pan_h, get_blend(nord9, BLACK, 64))
+    print("L", roll_x + 1,
+        roll_y + roll_h - roll_vol_h - 1, nord9, BOTTOM | LEFT)
+    print("R", roll_x + 1,
+        roll_y + roll_h - roll_vol_h - roll_pan_h + 1, nord9, TOP | LEFT)
+    $cen_y = roll_y + roll_h - roll_vol_h - roll_pan_h div 2 - 1
+    line(roll_x, $cen_y, roll_x + roll_w - 1, $cen_y, nord9)
 
     // Volume area
     fbox(roll_x, roll_y + roll_h - roll_vol_h,
