@@ -212,8 +212,8 @@ fn roll_clamp_p() {
     }
 }
 
-roll_bar = 9
-roll_beat = 3
+roll_bar = 16
+roll_beat = 4
 roll_tracks = new(16, 1, INT)
 
 $i = 0

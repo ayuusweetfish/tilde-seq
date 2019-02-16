@@ -103,6 +103,10 @@ fn load_file($path) {
 
 fn popularize_editor($org) {
     roll_clear()
+
+    roll_bar = $org.line * $org.dot
+    roll_beat = $org.dot
+
     $i = 0
     while ($i < 16) {
         roll_ctrl = 0
