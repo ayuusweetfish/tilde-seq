@@ -231,10 +231,15 @@ roll_bar = 16
 roll_beat = 4
 roll_tracks = new(16, 1, INT)
 
+roll_clip_len = 0
+roll_clip = new(16, 1, INT)
+
 $i = 0
 while ($i < 16) {
     roll_tracks[$i] = new(4096, 1, INT)
     roll_tracks[$i].cnt = 0
+    roll_clip[$i] = new(4096, 1, INT)
+    roll_clip[$i].cnt = 0
     $i + 1
 }
 
@@ -286,6 +291,10 @@ fn switch_track($t) {
 fn roll_clear() {
     $i = 0
     while ($i < 16) {
+        /*$j = 0
+        while ($j < roll_tracks[$i].cnt) {
+            remove(roll_tracks[$i][$j])
+        }*/
         roll_tracks[$i].cnt = 0
         $i + 1
     }
@@ -413,7 +422,7 @@ fn roll_break($x) {
     while ($j < 16) {
         if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
 
-        $cnt = roll_tracks[$i].cnt
+        $cnt = roll_tracks[$j].cnt
         $i = 0
         while ($i < $cnt) {
             $n = roll_tracks[$j][$i]
@@ -429,6 +438,9 @@ fn roll_break($x) {
 }
 
 fn roll_cut() {
+}
+
+fn roll_copy() {
     $x1 = roll_sside
     $x2 = roll_sfin
     if ($x1 > $x2) {
@@ -438,6 +450,79 @@ fn roll_cut() {
     }
     roll_break($x1)
     roll_break($x2 + 1)
+
+    roll_clip_len = $x2 - $x1 + 1
+    roll_clear_clipboard()
+
+    $j = 0
+    while ($j < 16) {
+        if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
+
+        $cnt = roll_tracks[$j].cnt
+        $i = 0
+        $new = 0
+        while ($i < $cnt) {
+            $n = roll_tracks[$j][$i]
+            if ($n.x >= $x1 && $n.x < $x2) {
+                roll_clip[$j][$new] = clone($n)
+                roll_clip[$j][$new].x - $x1
+                $new + 1
+            }
+            $i + 1
+        }
+
+        roll_clip[$j].cnt = $new
+        $j + 1
+    }
+}
+
+fn roll_clear_clipboard() {
+    $i = 0
+    while ($i < 16) {
+        $j = 0
+        while ($j < roll_clip[$i].cnt) {
+            remove(roll_clip[$i][$j])
+            $j + 1
+        }
+        roll_clip[$i].cnt = 0
+        $i + 1
+    }
+}
+
+fn roll_paste() {
+    $x1 = roll_sside
+    $x2 = roll_sfin
+    if ($x1 > $x2) {
+        $t = $x1
+        $x1 = $x2
+        $x2 = $t
+    }
+    roll_break($x1)
+
+    $j = 0
+    while ($j < 16) {
+        if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
+
+        $cnt = roll_tracks[$j].cnt
+        $i = 0
+        while ($i < $cnt) {
+            $n = roll_tracks[$j][$i]
+            if ($n.x >= $x1) {
+                $n.x + roll_clip_len
+            }
+            $i + 1
+        }
+
+        $cnt = roll_clip[$j].cnt
+        $i = 0
+        while ($i < $cnt) {
+            $n = roll_clip[$j][$i]
+            add_note($n.x + $x1, $n.y, $n.len, $n.vol, $n.pan)
+            $i + 1
+        }
+
+        $j + 1
+    }
 }
 
 fn draw_track($t, $x_sta, $x_fin, $y_sta, $y_fin) {
