@@ -125,6 +125,13 @@ fn roll_mouse_move($x, $y) {
         }
         roll_editing.y = $my
     }
+    if (roll_draw_vol) {
+        $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
+        $my = roll_y + roll_h - 1 - $y
+        if ($my < 0) { $my = 0 }
+        if ($my > roll_vol_h - 2) { $my = roll_vol_h - 2 }
+        edit_attr("vol", $mx, $my * 0xf8 div (roll_vol_h - 2))
+    }
     if (roll_draw_pan) {
         $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
         $my = roll_y + roll_h - roll_vol_h - 1 - $y
