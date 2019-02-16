@@ -386,6 +386,7 @@ fn roll_monophonize($m) {
                 if ($n.x + $n.len <= $m.x + $m.len) {
                     // Remove
                     remove_note($i)
+                    $cnt - 1
                     continue
                 } else {
                     // Truncate from the left
@@ -409,6 +410,7 @@ fn roll_remove_dup_attr($x) {
         $n = roll_notes[$i]
         if ($n.len == 0 && $n.x == $x) {
             remove_note($i)
+            $cnt - 1
             continue
         }
         $i + 1
