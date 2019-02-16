@@ -153,6 +153,8 @@ fn draw() {
     draw_btns()
 }
 
+last_time = 0
+
 while (running) {
     scr = get_screen()
 
@@ -226,6 +228,10 @@ while (running) {
             roll_mouse_move(EVT[EVT_X], EVT[EVT_Y])
         }
     }
+
+    $t = get_timer(0)
+    roll_tick($t - last_time)
+    last_time = $t
 
     changed = changed || btn_changed || roll_changed
     btn_changed = 0

@@ -34,6 +34,7 @@ roll_eside = -1 // X coordinate of a fixed side for editing; -1 if moving
 roll_selecting = 0
 roll_sside = 0  // X coordinate of a fixed side for selection
 roll_sfin = 0   // other side
+roll_hscroll = 0    // Dragging in the selection area
 
 roll_draw_pan = 0
 roll_draw_vol = 0
@@ -107,6 +108,12 @@ fn roll_mouse_move($x, $y) {
     }
     if (roll_selecting) {
         roll_sfin = floor((roll_px + $x - roll_x) / CELL_WIDTH)
+        // Horizontal scroll
+        roll_hscroll = 0
+        if ($x <= roll_x) { roll_hscroll - 1.5 }
+        if ($x <= roll_x + 16) { roll_hscroll - 1 }
+        if ($x >= roll_x + roll_w - 16) { roll_hscroll + 1 }
+        if ($x >= roll_x + roll_w) { roll_hscroll + 1.5 }
     }
     if (roll_editing != -1) {
         $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
@@ -147,6 +154,13 @@ fn roll_mouse_move($x, $y) {
     roll_changed = 1
 }
 
+fn roll_tick($dt) {
+    if (roll_hscroll != 0) {
+        roll_px + (roll_hscroll * $dt / 4)
+        roll_changed = 1
+    }
+}
+
 fn roll_mouse_up($x, $y) {
     if (roll_activated == 0) { ret }
     roll_activated = 0
@@ -156,6 +170,7 @@ fn roll_mouse_up($x, $y) {
     }
     roll_moving = 0
     roll_selecting = 0
+    roll_hscroll = 0
     roll_editing = -1
     roll_draw_pan = 0
     roll_draw_vol = 0
