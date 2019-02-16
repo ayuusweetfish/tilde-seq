@@ -7,6 +7,7 @@ CELL_WIDTH = 13
 MAX_TICKS = 990
 
 NOCHANGE = 0xff
+HIGHEST_NOTE = 95
 
 roll_x = 0
 roll_y = 0
@@ -110,6 +111,10 @@ fn roll_mouse_move($x, $y) {
     if (roll_editing != -1) {
         $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
         $my = floor((roll_py - $y + roll_y) / CELL_HEIGHT)
+        if ($mx < 0) { $mx = 0 }
+        if ($mx >= MAX_TICKS) { $mx = MAX_TICKS - 1 }
+        if ($my < 0) { $my = 0 }
+        if ($my > HIGHEST_NOTE) { $my = HIGHEST_NOTE }
         if (roll_eside == -1) {
             roll_editing.x = roll_mx + $mx
         } else {
@@ -199,11 +204,11 @@ fn roll_clamp_p() {
     if (roll_px < 0) {
         roll_px = 0
     }
-    if (roll_py > 128 * CELL_HEIGHT) {
-        roll_py = 128 * CELL_HEIGHT
+    if (roll_py > (HIGHEST_NOTE + 1) * CELL_HEIGHT) {
+        roll_py = (HIGHEST_NOTE + 1) * CELL_HEIGHT
     }
-    if (roll_py < roll_h - 1) {
-        roll_py = roll_h - 1
+    if (roll_py < roll_h - roll_vol_h - roll_pan_h - 1) {
+        roll_py = roll_h - roll_vol_h - roll_pan_h - 1
     }
 }
 
@@ -419,10 +424,7 @@ fn draw_track_attr($t, $x_sta, $x_fin, $y_sta, $y_fin) {
     while ($i < $cnt) {
         $n = roll_tracks[$t][$i]
 
-        if (($n.len == 0 && $n.x <= $x_fin && $n.x >= $x_sta) ||
-            ($n.x <= $x_fin && $n.x + $n.len - 1 >= $x_sta &&
-            $n.y >= $y_sta && $n.y <= $y_fin))
-        {
+        if ($n.x <= $x_fin && $n.x >= $x_sta) {
             if ($n.vol != NOCHANGE) {
                 fbox(roll_x + $n.x * CELL_WIDTH - roll_px + 1,
                     roll_y + roll_h - round((roll_vol_h - 3) * $n.vol / 0xf8) - 3,
@@ -487,7 +489,7 @@ fn draw_roll() {
     }
 
     // Unselected tracks
-    transp(64)
+    transp(32)
     $i = 15
     while ($i >= 0) {
         if ((roll_track_sel & (1 << $i)) == 0) {
@@ -553,11 +555,11 @@ fn draw_roll() {
     // Pan area
     transp(224)
     fbox(roll_x, roll_y + roll_h - roll_vol_h - roll_pan_h,
-        roll_w, roll_pan_h, get_blend(nord9, BLACK, 96))
+        roll_w, roll_pan_h, get_blend(nord9, BLACK, 64))
 
     // Volume area
     fbox(roll_x, roll_y + roll_h - roll_vol_h,
-        roll_w, roll_vol_h, get_blend(nord7, BLACK, 96))
+        roll_w, roll_vol_h, get_blend(nord7, BLACK, 64))
 
     // Draw attributes for selected track
     draw_track_attr(roll_tid, $x_sta, $x_fin, $y_sta, $y_fin)

@@ -118,6 +118,7 @@ fn popularize_editor($org) {
         }
         $i + 1
     }
+    switch_track(0)
 }
 
 o = load_file("anzen.org")
