@@ -106,6 +106,8 @@ menu_btns_bg[9] = nord8
 menu_btns_bg[10] = nord8
 menu_btns_bg[11] = nord8
 
+menu_btns_text[5].cb = roll_cut
+
 menu_btns_text[11].cb = {
     prefs_dialog()
 }
