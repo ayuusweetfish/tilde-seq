@@ -263,6 +263,15 @@ fn switch_track($t) {
     roll_changed = 1
 }
 
+fn roll_clear() {
+    $i = 0
+    while ($i < 16) {
+        roll_tracks[$i].cnt = 0
+        $i + 1
+    }
+    roll_changed = 1
+}
+
 fn add_note($x, $y, $len, $vol, $pan) {
     roll_remove_dup_attr($x)
 

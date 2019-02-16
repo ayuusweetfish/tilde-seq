@@ -1,0 +1,128 @@
+fn read_uint8($f) {
+    ret(fgetc($f))
+}
+
+fn read_uint16($f) {
+    $r = fgetc($f)
+    $r + (fgetc($f) << 8)
+    ret($r)
+}
+
+fn read_uint32($f) {
+    $r = fgetc($f)
+    $r + (fgetc($f) << 8)
+    $r + (fgetc($f) << 16)
+    $r + (fgetc($f) << 24)
+    ret($r)
+}
+
+fn load_file($path) {
+    $f = fopen($path, "rb")
+    if ($f == 0) {
+        ret("Cannot open file")
+    }
+
+    $magic = new(6, 1, INT8)
+    fread($magic, 6, $f)
+
+    if (strcmp($magic, "Org-02") != 0 && strcmp($magic, "Org-03") != 0) {
+        fclose($f)
+        ret("Unsupported Organya version, or not an Organya file at all")
+    }
+
+    $org = new()
+
+    $org.wait = read_uint16($f)
+    $org.line = read_uint8($f)
+    $org.dot = read_uint8($f)
+    $org.rpt_a = read_uint32($f)
+    $org.rpt_b = read_uint32($f)
+
+    $tracks = new(16, 1, INT32)
+    $i = 0
+    while ($i < 16) {
+        $t = new()
+        $t.freq = read_uint16($f)
+        $t.instr = read_uint8($f)
+        $t.pipi = read_uint8($f)
+        $t.note_cnt = read_uint16($f)
+        $tracks[$i] = $t
+        $i + 1
+    }
+
+    $i = 0
+    while ($i < 16) {
+        $t = $tracks[$i]
+        $n = $t.note_cnt
+
+        // Create list
+        $l = new($n, 1, INT32)
+        $j = 0
+        while ($j < $n) {
+            $l[$j] = new()
+            $j + 1
+        }
+
+        // Read data
+        $j = 0
+        while ($j < $n) {
+            $l[$j].x = read_uint32($f)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
+            $l[$j].y = read_uint8($f)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
+            $l[$j].len = read_uint8($f)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
+            $l[$j].vol = read_uint8($f)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
+            $l[$j].pan = read_uint8($f)
+            $j + 1
+        }
+
+        $t.note_list = $l
+        $i + 1
+    }
+
+    $org.tracks = $tracks
+    $org.succeeded = 1
+
+    fclose($f)
+    ret($org)
+}
+
+fn popularize_editor($org) {
+    roll_clear()
+    $i = 0
+    while ($i < 16) {
+        roll_ctrl = 0
+        switch_track($i)
+
+        $n = $org.tracks[$i].note_cnt
+        $l = $org.tracks[$i].note_list
+        $j = 0
+        while ($j < $n) {
+            $note = $l[$j]
+            add_note($note.x, $note.y, $note.len, $note.vol, $note.pan)
+            $j + 1
+        }
+        $i + 1
+    }
+}
+
+o = load_file("anzen.org")
+if (o.succeeded) {
+    popularize_editor(o)
+} else {
+    halt
+}

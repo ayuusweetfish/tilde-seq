@@ -34,6 +34,8 @@ start_timer(0)
 include "buttons.pixi"
 include "roll.pixi"
 
+include "organya.pixi"
+
 track_btns = new(16)
 track_hotkeys = "QWERTYUI"
 
