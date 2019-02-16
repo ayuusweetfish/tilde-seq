@@ -6,14 +6,16 @@ CELL_HEIGHT = 8
 CELL_WIDTH = 13
 MAX_TICKS = 990
 
+NOCHANGE = 0xff
+
 roll_x = 0
 roll_y = 0
 roll_w = -1
 roll_h = -1
 roll_sel_h = 12
 
-roll_pan_h = 39 // Range for pan is [0, 12] (13 possible values)
-roll_vol_h = 50 // Range for volume is [0, 248]
+roll_pan_h = 36 + 2 // Range for pan is [0, 12]
+roll_vol_h = 50 + 2 // Range for volume is [0, 248]
 
 roll_px = 0
 roll_py = 48 * CELL_HEIGHT
@@ -31,6 +33,9 @@ roll_eside = -1 // X coordinate of a fixed side for editing; -1 if moving
 roll_selecting = 0
 roll_sside = 0  // X coordinate of a fixed side for selection
 roll_sfin = 0   // other side
+
+roll_draw_pan = 0
+roll_draw_vol = 0
 
 roll_changed = 0
 
@@ -60,7 +65,7 @@ fn roll_mouse_down($x, $y) {
                 roll_my = floor((roll_py - $y + roll_y) / CELL_HEIGHT)
                 roll_locate_note(roll_mx, roll_my)
                 if (roll_editing == -1) {
-                    roll_editing = add_note(roll_mx, roll_my, 1)
+                    roll_editing = add_note(roll_mx, roll_my, 1, 0x80, 0x6)
                     roll_eside = roll_mx
                 } else {
                     roll_mx = roll_editing.x - roll_mx
@@ -76,6 +81,8 @@ fn roll_mouse_down($x, $y) {
                 roll_mx = roll_px + $x
                 roll_my = roll_py - $y
             } else {
+                roll_draw_pan = 1
+                roll_mouse_move($x, $y)
             }
         }
         if ($y >= roll_y + roll_h - roll_vol_h) {
@@ -84,6 +91,8 @@ fn roll_mouse_down($x, $y) {
                 roll_mx = roll_px + $x
                 roll_my = roll_py - $y
             } else {
+                roll_draw_vol = 1
+                roll_mouse_move($x, $y)
             }
         }
     }
@@ -116,6 +125,13 @@ fn roll_mouse_move($x, $y) {
         }
         roll_editing.y = $my
     }
+    if (roll_draw_pan) {
+        $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
+        $my = roll_y + roll_h - roll_vol_h - 1 - $y
+        if ($my < 0) { $my = 0 }
+        if ($my > roll_pan_h - 2) { $my = roll_pan_h - 2 }
+        edit_attr("pan", $mx, $my * 0xc div (roll_pan_h - 2))
+    }
     roll_changed = 1
 }
 
@@ -129,6 +145,8 @@ fn roll_mouse_up($x, $y) {
     roll_moving = 0
     roll_selecting = 0
     roll_editing = -1
+    roll_draw_pan = 0
+    roll_draw_vol = 0
 }
 
 fn roll_mouse_scrollup($x, $y) {
@@ -238,11 +256,13 @@ fn switch_track($t) {
     roll_changed = 1
 }
 
-fn add_note($x, $y, $len) {
+fn add_note($x, $y, $len, $vol, $pan) {
     $n = new()
     $n.x = $x
     $n.y = $y
     $n.len = $len
+    $n.vol = $vol
+    $n.pan = $pan
 
     roll_notes[roll_tracks[roll_tid].cnt] = $n
     roll_tracks[roll_tid].cnt + 1
@@ -274,6 +294,26 @@ fn roll_locate_note($x, $y) {
     }
 }
 
+fn edit_attr($prop, $x, $val) {
+    $cnt = roll_tracks[roll_tid].cnt
+    $i = 0
+    while ($i < $cnt) {
+        $n = roll_notes[$i]
+        if ($n.x == $x) {
+            set_prop($n, $prop, $val)
+            ret
+        }
+        $i + 1
+    }
+
+    // No note matches, create a new one
+    if ($prop[0] == 'v') {
+        add_note($x, NOCHANGE, 0, $val, NOCHANGE)
+    } else {
+        add_note($x, NOCHANGE, 0, NOCHANGE, $val)
+    }
+}
+
 // Make the track monophonic w.r.t. a given newly-added note
 fn roll_monophonize($m) {
     $cnt = roll_tracks[roll_tid].cnt
@@ -288,7 +328,7 @@ fn roll_monophonize($m) {
                 } else {
                     // Split into two notes
                     add_note($m.x + $m.len, $n.y,
-                        ($n.x + $n.len) - ($m.x + $m.len))
+                        ($n.x + $n.len) - ($m.x + $m.len), $n.vol, $n.pan)
                     $n.len = $m.x - $n.x
                 }
             } else {
@@ -324,6 +364,35 @@ fn draw_track($t, $x_sta, $x_fin, $y_sta, $y_fin) {
                 CELL_WIDTH * $n.len - 1,
                 CELL_HEIGHT,
                 $col)
+        }
+
+        $i + 1
+    }
+}
+
+fn round($x) {
+    ret(floor($x + 0.5))
+}
+
+fn draw_track_attr($t, $x_sta, $x_fin, $y_sta, $y_fin) {
+    $cnt = roll_tracks[$t].cnt
+    $i = 0
+    $col = get_blend(track_colours[$t], WHITE, 96)
+
+    transp(192)
+    while ($i < $cnt) {
+        $n = roll_tracks[$t][$i]
+
+        if (($n.len == 0 && $n.x <= $x_fin && $n.x >= $x_sta) ||
+            ($n.x <= $x_fin && $n.x + $n.len - 1 >= $x_sta &&
+            $n.y >= $y_sta && $n.y <= $y_fin))
+        {
+            fbox(roll_x + $n.x * CELL_WIDTH - roll_px + 1,
+                roll_y + roll_h - round((roll_vol_h - 3) * $n.vol / 0xf8) - 3,
+                CELL_WIDTH - 1, 3, $col)
+            fbox(roll_x + $n.x * CELL_WIDTH - roll_px + 1,
+                roll_y + roll_h - roll_vol_h - round((roll_pan_h - 3) * $n.pan / 0xc) - 3,
+                CELL_WIDTH - 1, 3, $col)
         }
 
         $i + 1
@@ -449,4 +518,7 @@ fn draw_roll() {
     // Volume area
     fbox(roll_x, roll_y + roll_h - roll_vol_h,
         roll_w, roll_vol_h, get_blend(nord7, BLACK, 96))
+
+    // Draw attributes for selected track
+    draw_track_attr(roll_tid, $x_sta, $x_fin, $y_sta, $y_fin)
 }
