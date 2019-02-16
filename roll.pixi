@@ -438,16 +438,23 @@ fn roll_break($x) {
 }
 
 fn roll_cut() {
+    roll_copy()
+    roll_shrink()
+}
+
+fn sort_sel_endpts() {
+    if (roll_sside > roll_sfin) {
+        $t = roll_sside
+        roll_sside = roll_sfin
+        roll_sfin = $t
+    }
 }
 
 fn roll_copy() {
+    sort_sel_endpts()
     $x1 = roll_sside
     $x2 = roll_sfin
-    if ($x1 > $x2) {
-        $t = $x1
-        $x1 = $x2
-        $x2 = $t
-    }
+
     roll_break($x1)
     roll_break($x2 + 1)
 
@@ -490,13 +497,10 @@ fn roll_clear_clipboard() {
 }
 
 fn roll_paste() {
+    sort_sel_endpts()
     $x1 = roll_sside
     $x2 = roll_sfin
-    if ($x1 > $x2) {
-        $t = $x1
-        $x1 = $x2
-        $x2 = $t
-    }
+
     roll_break($x1)
 
     $j = 0
@@ -517,7 +521,70 @@ fn roll_paste() {
         $i = 0
         while ($i < $cnt) {
             $n = roll_clip[$j][$i]
+            // FIXME: add the note on the correct track
             add_note($n.x + $x1, $n.y, $n.len, $n.vol, $n.pan)
+            $i + 1
+        }
+
+        $j + 1
+    }
+}
+
+fn roll_shrink() {
+    sort_sel_endpts()
+    $x1 = roll_sside
+    $x2 = roll_sfin
+
+    roll_break($x1)
+    roll_break($x2 + 1)
+
+    $j = 0
+    while ($j < 16) {
+        if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
+
+        $cnt = roll_tracks[$j].cnt
+        $i = 0
+        while ($i < $cnt) {
+            $n = roll_tracks[$j][$i]
+            if ($n.x >= $x2) {
+                $n.x - ($x2 - $x1 + 1)
+            } else {
+                if ($n.x >= $x1) {
+                    // FIXME: carry out removal on the correct track
+                    remove_note($i)
+                    $cnt - 1
+                    continue
+                }
+            }
+            $i + 1
+        }
+
+        $j + 1
+    }
+}
+
+fn roll_clearsel() {
+    sort_sel_endpts()
+    $x1 = roll_sside
+    $x2 = roll_sfin
+
+    roll_break($x1)
+    roll_break($x2 + 1)
+
+    $j = 0
+    while ($j < 16) {
+        if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
+
+        $cnt = roll_tracks[$j].cnt
+        $i = 0
+        while ($i < $cnt) {
+            $n = roll_tracks[$j][$i]
+            if ($n.x >= $x1 && $n.x <= $x2) {
+                // FIXME: carry out removal on the correct track
+                remove_note($i)
+                $cnt - 1
+                continue
+            }
             $i + 1
         }
 
@@ -660,13 +727,10 @@ fn draw_roll() {
     transp(128)
     fbox(roll_x, roll_y, roll_w, roll_sel_h, nord4)
 
+    sort_sel_endpts()
     $x1 = roll_sside
     $x2 = roll_sfin
-    if ($x1 > $x2) {
-        $t = $x1
-        $x1 = $x2
-        $x2 = $t
-    }
+
     transp(255)
     fbox(roll_x + $x1 * CELL_WIDTH - roll_px, roll_y,
         ($x2 - $x1 + 1) * CELL_WIDTH, roll_sel_h, nord9)
