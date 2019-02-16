@@ -101,6 +101,23 @@ fn load_file($path) {
     ret($org)
 }
 
+fn menu_new_file() {
+}
+
+fn menu_open_file() {
+    $path = file_dialog("Open", "org", "file_dialog_state")
+    if ($path != -1) {
+        printf("%s\n", $path)
+        $result = load_file($path)
+        remove($path)
+        if ($result.succeeded) {
+            popularize_editor($result)
+        } else {
+            // TODO: Display error message
+        }
+    }
+}
+
 fn popularize_editor($org) {
     roll_clear()
 
@@ -123,11 +140,4 @@ fn popularize_editor($org) {
         $i + 1
     }
     switch_track(0)
-}
-
-o = load_file("anzen.org")
-if (o.succeeded) {
-    popularize_editor(o)
-} else {
-    halt
 }
