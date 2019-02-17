@@ -168,6 +168,9 @@ fn roll_mouse_up($x, $y) {
         roll_monophonize(roll_editing)
         roll_changed = 1
     }
+    if (roll_editing != -1 || roll_draw_pan || roll_draw_vol) {
+        roll_push_history()
+    }
     roll_moving = 0
     roll_selecting = 0
     roll_hscroll = 0
@@ -231,6 +234,11 @@ roll_bar = 16
 roll_beat = 4
 roll_tracks = new(16, 1, INT)
 
+HISTORY = 32
+roll_history = new(HISTORY, 1, INT)
+roll_hist_top = 0
+roll_hist_ptr = 0
+
 roll_clip_len = 0
 roll_clip = new(16, 1, INT)
 
@@ -240,6 +248,12 @@ while ($i < 16) {
     roll_tracks[$i].cnt = 0
     roll_clip[$i] = new(4096, 1, INT)
     roll_clip[$i].cnt = 0
+    $i + 1
+}
+
+$i = 0
+while ($i < HISTORY) {
+    roll_history[$i] = new(16, 1, INT)
     $i + 1
 }
 
@@ -295,6 +309,7 @@ fn roll_clear() {
         roll_tracks[$i].cnt = 0
         $i + 1
     }
+    roll_clear_history()
     roll_changed = 1
 }
 
@@ -307,7 +322,6 @@ fn add_note($tid, $x, $y, $len, $vol, $pan) {
     $n.len = $len
     $n.vol = $vol
     $n.pan = $pan
-    autorel($n)
 
     $l = roll_tracks[$tid]
     $l[$l.cnt] = $n
@@ -317,7 +331,7 @@ fn add_note($tid, $x, $y, $len, $vol, $pan) {
 
 fn remove_note($tid, $i) {
     $l = roll_tracks[$tid]
-    release($l[$i])
+    remove($l[$i])
     $l.cnt - 1
     $l[$i] = $l[$l.cnt]
 }
@@ -449,6 +463,7 @@ fn roll_break($x) {
 fn roll_cut() {
     roll_copy()
     roll_shrink()
+    roll_push_history()
 }
 
 fn sort_sel_endpts() {
@@ -491,6 +506,8 @@ fn roll_copy() {
         roll_clip[$j].cnt = $new
         $j + 1
     }
+
+    roll_push_history()
 }
 
 fn roll_clear_clipboard() {
@@ -538,6 +555,8 @@ fn roll_paste() {
 
         $j + 1
     }
+
+    roll_push_history()
 }
 
 fn roll_shrink() {
@@ -571,6 +590,8 @@ fn roll_shrink() {
 
         $j + 1
     }
+
+    roll_push_history()
 }
 
 fn roll_clearsel() {
@@ -600,6 +621,110 @@ fn roll_clearsel() {
 
         $j + 1
     }
+
+    roll_push_history()
+}
+
+fn duplicate_track($l) {
+    $ret = new(4096, 1, INT)
+
+    $cnt = $l.cnt
+    $ret.cnt = $cnt
+    $i = 0
+    while ($i < $cnt) {
+        $ret[$i] = clone($l[$i])
+        $i + 1
+    }
+
+    autorel($ret)
+    ret($ret)
+}
+
+fn roll_push_history() {
+    if (roll_hist_ptr == HISTORY - 1) {
+        // Release the oldest record
+        $i = 0
+        while ($i < 16) {
+            release(roll_history[0][$i])
+            $i + 1
+        }
+        // Shift out
+        $i = 1
+        while ($i < HISTORY) {
+            copy(roll_history[$i - 1], roll_history[$i])
+            $i + 1
+        }
+        roll_hist_ptr - 1
+    } else {
+        // Release discarded history entries
+        // Range: (roll_hist_ptr, roll_hist_top]
+        $j = roll_hist_ptr + 1
+        while ($j <= roll_hist_top) {
+            $i = 0
+            while ($i < 16) {
+                release(roll_history[$j][$i])
+                $i + 1
+            }
+            $j + 1
+        }
+    }
+
+    $last = roll_history[roll_hist_ptr]
+    $h = roll_history[roll_hist_ptr + 1]
+    $j = 0
+    while ($j < 16) {
+        if ((roll_track_sel & (1 << $j)) == 0) {
+            // Copy unchanged track
+            $h[$j] = $last[$j]
+            retain($h[$j])
+        } else {
+            $h[$j] = duplicate_track(roll_tracks[$j])
+        }
+        $j + 1
+    }
+
+    roll_hist_ptr + 1
+    roll_hist_top = roll_hist_ptr
+}
+
+fn roll_undo() {
+    if (roll_hist_ptr > 0) {
+        roll_hist_ptr - 1
+        $i = 0
+        while ($i < 16) {
+            roll_tracks[$i] = duplicate_track(roll_history[roll_hist_ptr][$i])
+            $i + 1
+        }
+    }
+}
+
+fn roll_redo() {
+    if (roll_hist_ptr < roll_hist_top) {
+        roll_hist_ptr + 1
+        $i = 0
+        while ($i < 16) {
+            roll_tracks[$i] = duplicate_track(roll_history[roll_hist_ptr][$i])
+            $i + 1
+        }
+    }
+}
+
+fn roll_clear_history() {
+    $j = 0
+    while ($j <= roll_hist_top) {
+        $i = 0
+        while ($i < 16) {
+            release(roll_history[$j][$i])
+            $i + 1
+        }
+        $j + 1
+    }
+}
+
+$i = 0
+while ($i < 16) {
+    roll_history[0][$i] = duplicate_track(roll_tracks[$i])
+    $i + 1
 }
 
 fn draw_track($t, $x_sta, $x_fin, $y_sta, $y_fin) {
