@@ -2,24 +2,6 @@ in_options = 0
 
 instruments = new(16, 1, INT8)
 
-fn reset_instruments() {
-    $i = 0
-    while ($i < 8) {
-        instruments[$i] = $i * 11
-        $i + 1
-    }
-    instruments[8] = 39
-    instruments[9] = 32
-    instruments[10] = 35
-    instruments[11] = 34
-    instruments[12] = 20
-    instruments[13] = 33
-    instruments[14] = 22
-    instruments[15] = 40
-}
-
-reset_instruments()
-
 // Initialize
 TIMESIGS_CNT = 8
 timesigs = new(TIMESIGS_CNT, 1, INT8)
@@ -35,8 +17,31 @@ timesigs[7] = 84
 timesig_btn = new(TIMESIGS_CNT, 1, INT)
 tsigidx = 0
 
+tune_btn = new(19, 1, INT)
+tunings = new(16, 1, INT)
+
 wave_btn = new(100, 1, INT)
 drum_btn = new(100, 12, INT)
+
+fn reset_instruments() {
+    $i = 0
+    while ($i < 8) {
+        instruments[$i] = $i * 11
+        $i + 1
+    }
+    instruments[8] = 39
+    instruments[9] = 32
+    instruments[10] = 35
+    instruments[11] = 34
+    instruments[12] = 20
+    instruments[13] = 33
+    instruments[14] = 22
+    instruments[15] = 40
+
+    clean(tunings, 1000)
+}
+
+reset_instruments()
 
 fn options_init() {
     // Time-sig buttons
@@ -48,6 +53,20 @@ fn options_init() {
             0, 0, 0, 20,
             clone($s), nord4, nord6, 0x2040, timesig_callback)
         timesig_btn[$i].idx = $i
+        $i + 1
+    }
+
+    // Temperament buttons
+    $i = 0
+    while ($i < 19) {
+        if ($i < 9) {
+            sprintf($s, "-%d", 9 - $i)
+        } else {
+            if ($i == 9) { $s = "0" }
+            else { sprintf($s, "+%d", $i - 9) }
+        }
+        tune_btn[$i] = add_btn(0, 0, 0, 20, clone($s), 0, nord6, 0, tune_callback)
+        tune_btn[$i].idx = $i
         $i + 1
     }
 
@@ -66,6 +85,10 @@ fn timesig_callback($sender) {
     tsigidx = $sender.idx
     roll_beat = timesigs[tsigidx] div 10
     roll_bar = timesigs[tsigidx] % 10 * roll_beat
+}
+
+fn tune_callback($sender) {
+    tunings[roll_tid] = $sender.idx * 100 + 100
 }
 
 fn wave_callback($sender) {
@@ -88,10 +111,9 @@ fn draw_options() {
     // Place time signature buttons
     $btns_x = roll_x + 80
     $btns_w = roll_w - 86
-    $xs = divide($btns_x, $btns_w, 8)
 
     print("Beats:Ticks", roll_x + 6, roll_y + 17, nord6, LEFT)
-
+    $xs = divide($btns_x, $btns_w, 8)
     $i = 0
     while ($i < TIMESIGS_CNT) {
         timesig_btn[$i].x = $xs[$i] + 1
@@ -106,6 +128,26 @@ fn draw_options() {
         timesig_btn[tsigidx].bg = nord10
         timesig_btn[tsigidx].alphas = 0xa088
     }
+
+    // Place tempo widget
+    print("Tick length", roll_x + 6, roll_y + 39, nord6, LEFT)
+
+    // Track-specific settings
+    // Place temperament buttons
+    print("Fine tune", roll_x + 6, roll_y + 61, nord6, LEFT)
+    $xs = divide($btns_x, $btns_w, 19)
+    $i = 0
+    while ($i < 19) {
+        tune_btn[$i].x = $xs[$i] + 1
+        tune_btn[$i].y = roll_y + 50
+        tune_btn[$i].w = $xs[$i + 1] - $xs[$i] - 2
+        tune_btn[$i].bg = nord4
+        tune_btn[$i].alphas = 0x2040
+        $i + 1
+    }
+    $idx = round(tunings[roll_tid] / 100) - 1
+    tune_btn[$idx].bg = track_colours[roll_tid]
+    tune_btn[$idx].alphas = 0xa088
 
     // Place instrument buttons
     $btns_x = roll_x + 6

@@ -220,6 +220,7 @@ fn popularize_editor($org) {
             $j + 1
         }
 
+        tunings[$i] = $org.tracks[$i].freq
         instruments[$i] = $org.tracks[$i].instr
         $i + 1
     }
