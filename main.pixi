@@ -31,6 +31,8 @@ is_down = 0
 frames = 0
 start_timer(0)
 
+include "mem.pixi"
+
 include "buttons.pixi"
 include "roll.pixi"
 

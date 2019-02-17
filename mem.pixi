@@ -1,0 +1,12 @@
+fn autorel($c) {
+    $c.ref = 1
+}
+
+fn retain($c) {
+    $c.ref + 1
+}
+
+fn release($c) {
+    $c.ref - 1
+    if ($c.ref == 0) { remove($c) }
+}

@@ -288,10 +288,10 @@ fn switch_track($t) {
 fn roll_clear() {
     $i = 0
     while ($i < 16) {
-        /*$j = 0
+        $j = 0
         while ($j < roll_tracks[$i].cnt) {
-            remove(roll_tracks[$i][$j])
-        }*/
+            release(roll_tracks[$i][$j])
+        }
         roll_tracks[$i].cnt = 0
         $i + 1
     }
@@ -307,6 +307,7 @@ fn add_note($tid, $x, $y, $len, $vol, $pan) {
     $n.len = $len
     $n.vol = $vol
     $n.pan = $pan
+    autorel($n)
 
     $l = roll_tracks[$tid]
     $l[$l.cnt] = $n
@@ -316,7 +317,7 @@ fn add_note($tid, $x, $y, $len, $vol, $pan) {
 
 fn remove_note($tid, $i) {
     $l = roll_tracks[$tid]
-    remove($l[$i])
+    release($l[$i])
     $l.cnt - 1
     $l[$i] = $l[$l.cnt]
 }
