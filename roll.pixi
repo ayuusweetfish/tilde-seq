@@ -238,6 +238,7 @@ HISTORY = 32
 roll_history = new(HISTORY, 1, INT)
 roll_hist_top = 0
 roll_hist_ptr = 0
+roll_no_history = 0
 
 roll_clip_len = 0
 roll_clip = new(16, 1, INT)
@@ -300,16 +301,17 @@ fn switch_track($t) {
 }
 
 fn roll_clear() {
+    roll_clear_history()
     $i = 0
     while ($i < 16) {
         $j = 0
         while ($j < roll_tracks[$i].cnt) {
             release(roll_tracks[$i][$j])
+            $j + 1
         }
         roll_tracks[$i].cnt = 0
         $i + 1
     }
-    roll_clear_history()
     roll_changed = 1
 }
 
@@ -641,6 +643,7 @@ fn duplicate_track($l) {
 }
 
 fn roll_push_history() {
+    if (roll_no_history) { ret }
     if (roll_hist_ptr == HISTORY - 1) {
         // Release the oldest record
         $i = 0
@@ -721,11 +724,15 @@ fn roll_clear_history() {
     }
 }
 
-$i = 0
-while ($i < 16) {
-    roll_history[0][$i] = duplicate_track(roll_tracks[$i])
-    $i + 1
+fn roll_init_history() {
+    $i = 0
+    while ($i < 16) {
+        roll_history[0][$i] = duplicate_track(roll_tracks[$i])
+        $i + 1
+    }
 }
+
+roll_init_history()
 
 fn draw_track($t, $x_sta, $x_fin, $y_sta, $y_fin) {
     $l = roll_tracks[$t]

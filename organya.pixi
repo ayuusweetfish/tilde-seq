@@ -119,6 +119,7 @@ fn menu_open_file() {
 
 fn popularize_editor($org) {
     roll_clear()
+    roll_no_history = 1
 
     roll_bar = $org.line * $org.dot
     roll_beat = $org.dot
@@ -137,4 +138,7 @@ fn popularize_editor($org) {
         }
         $i + 1
     }
+
+    roll_no_history = 0
+    roll_init_history()
 }
