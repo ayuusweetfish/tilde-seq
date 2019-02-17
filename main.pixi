@@ -35,6 +35,7 @@ include "mem.pixi"
 
 include "buttons.pixi"
 include "roll.pixi"
+include "options.pixi"
 
 include "organya.pixi"
 
@@ -128,6 +129,17 @@ menu_btns_text[5].cb = roll_cut
 menu_btns_text[6].cb = roll_copy
 menu_btns_text[7].cb = roll_clearsel
 menu_btns_text[8].cb = roll_paste
+menu_btns_text[10].cb = {
+    in_options ^ 1
+    if (in_options) {
+        menu_btns[10].text = "PnoRoll"
+        btns_cnt = all_btn_cnt
+    } else {
+        menu_btns[10].text = "Options"
+        btns_cnt = normal_btn_cnt
+    }
+    changed = 1
+}
 menu_btns_text[11].cb = {
     prefs_dialog()
 }
@@ -140,6 +152,11 @@ while ($i < 12) {
             menu_btns_bg[$i], nord6, 0xd0ff, menu_btns_text[$i].cb)
     $i + 1
 }
+
+normal_btn_cnt = btns_cnt
+options_init()
+all_btn_cnt = btns_cnt
+btns_cnt = normal_btn_cnt
 
 fn on_resize($w, $h) {
     $i = 0
@@ -170,10 +187,15 @@ fn on_resize($w, $h) {
 }
 
 fn draw() {
-    draw_roll()
-    transp(255)
-    fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, 19, WINDOW_YSIZE, nord0)
-    fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, WINDOW_XSIZE, 19, nord0)
+    if (in_options) {
+        draw_options()
+    } else {
+        draw_roll()
+        transp(255)
+        fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, 19, WINDOW_YSIZE, nord0)
+        fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, WINDOW_XSIZE, 19, nord0)
+    }
+
     draw_btns()
 
     transp(240)
@@ -249,19 +271,28 @@ while (running) {
                     roll_mouse_scrolldown(EVT[EVT_X], EVT[EVT_Y])
                 } else {
                     btn_mouse_down(EVT[EVT_X], EVT[EVT_Y])
-                    roll_mouse_down(EVT[EVT_X], EVT[EVT_Y])
-                    is_down = 1
+                    if (in_options) {
+                    } else {
+                        roll_mouse_down(EVT[EVT_X], EVT[EVT_Y])
+                        is_down = 1
+                    }
                 }
             }
         }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONUP) {
             btn_mouse_up(EVT[EVT_X], EVT[EVT_Y])
-            roll_mouse_up(EVT[EVT_X], EVT[EVT_Y])
-            is_down = 0
+            if (in_options) {
+            } else {
+                roll_mouse_up(EVT[EVT_X], EVT[EVT_Y])
+                is_down = 0
+            }
         }
         if (is_down && EVT[EVT_TYPE] == EVT_MOUSEMOVE) {
             btn_mouse_move(EVT[EVT_X], EVT[EVT_Y])
-            roll_mouse_move(EVT[EVT_X], EVT[EVT_Y])
+            if (in_options) {
+            } else {
+                roll_mouse_move(EVT[EVT_X], EVT[EVT_Y])
+            }
         }
     }
 

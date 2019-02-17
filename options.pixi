@@ -1,0 +1,78 @@
+in_options = 0
+
+instruments = new(16, 1, INT8)
+
+fn reset_instruments() {
+    $i = 0
+    while ($i < 8) {
+        instruments[$i] = $i * 11
+        $i + 1
+    }
+    instruments[8] = 39
+    instruments[9] = 32
+    instruments[10] = 35
+    instruments[11] = 34
+    instruments[12] = 20
+    instruments[13] = 33
+    instruments[14] = 22
+    instruments[15] = 40
+}
+
+reset_instruments()
+
+// Initialize
+wave_btn = new(100, 1, INT)
+drum_btn = new(100, 12, INT)
+
+fn options_init() {
+    $i = 0
+    $s = ""
+    while ($i < 100) {
+        sprintf($s, "Wave %02d", $i)
+        wave_btn[$i] = add_btn(0, 0, 10, 10, clone($s), nord4, nord6, 0x2040, wave_callback)
+        wave_btn[$i].idx = $i
+        $i + 1
+    }
+    remove($s)
+}
+
+fn wave_callback($sender) {
+    instruments[roll_tid] = $sender.idx
+}
+
+fn draw_options() {
+    clear(nord0)
+
+    // Place instrument buttons
+    $btns_x = roll_x + 6
+    $btns_y = roll_y + 72
+    $btns_w = roll_w - 12
+    $btns_h = roll_h - 78
+
+    $xs = new(11, 1, INT16)
+    $ys = new(11, 1, INT16)
+
+    $i = 0
+    while ($i <= 10) {
+        $xs[$i] = $btns_x + $btns_w / 10 * $i
+        $ys[$i] = $btns_y + $btns_h / 10 * $i
+        $i + 1
+    }
+
+    $i = 0
+    while ($i < 100) {
+        $r = $i div 10
+        $c = $i % 10
+        wave_btn[$i].x = $xs[$c] + 1
+        wave_btn[$i].y = $ys[$r] + 1
+        wave_btn[$i].w = $xs[$c + 1] - $xs[$c] - 2
+        wave_btn[$i].h = $ys[$r + 1] - $ys[$r] - 2
+        wave_btn[$i].bg = nord4
+        wave_btn[$i].alphas = 0x2040
+        $i + 1
+    }
+
+    $c = track_colours[roll_tid]
+    wave_btn[instruments[roll_tid]].bg = $c
+    wave_btn[instruments[roll_tid]].alphas = 0xa080
+}

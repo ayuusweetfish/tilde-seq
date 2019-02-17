@@ -133,7 +133,7 @@ fn save_file($path) {
     $i = 0
     while ($i < 16) {
         put_uint16($f, 1000)
-        put_uint8($f, 0)
+        put_uint8($f, instruments[$i])
         put_uint8($f, 0)
         put_uint16($f, roll_tracks[$i].cnt)
         $i + 1
@@ -203,6 +203,8 @@ fn popularize_editor($org) {
             add_note($i, $note.x, $note.y, $note.len, $note.vol, $note.pan)
             $j + 1
         }
+
+        instruments[$i] = $org.tracks[$i].instr
         $i + 1
     }
 

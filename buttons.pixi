@@ -1,4 +1,4 @@
-btns = new(128)
+btns = new(192)
 btns_cnt = 0
 
 btn_sel_id = -1
