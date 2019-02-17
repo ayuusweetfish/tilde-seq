@@ -124,7 +124,7 @@ fn save_file($path) {
     }
 
     fputs("Org-03", $f)
-    put_uint16($f, 16)
+    put_uint16($f, tick_len)
     put_uint8($f, roll_bar div roll_beat)
     put_uint8($f, roll_beat)
     put_uint32($f, 0)
@@ -132,7 +132,7 @@ fn save_file($path) {
 
     $i = 0
     while ($i < 16) {
-        put_uint16($f, 1000)
+        put_uint16($f, tunings[$i])
         put_uint8($f, instruments[$i])
         put_uint8($f, 0)
         put_uint16($f, roll_tracks[$i].cnt)
@@ -239,4 +239,6 @@ fn popularize_editor($org) {
         }
         $i + 1
     }
+
+    tick_len = $org.wait
 }

@@ -17,6 +17,19 @@ timesigs[7] = 84
 timesig_btn = new(TIMESIGS_CNT, 1, INT)
 tsigidx = 0
 
+tempo_btn = new(4, 1, INT)
+tempo_delta = new(4, 1, INT)
+tempo_delta[0] = -5
+tempo_delta[1] = -1
+tempo_delta[2] = 1
+tempo_delta[3] = 5
+tempo_btn_pos = new(4, 1, INT)
+tempo_btn_pos[0] = 0
+tempo_btn_pos[1] = 1
+tempo_btn_pos[2] = 6
+tempo_btn_pos[3] = 7
+tick_len = 100
+
 tune_btn = new(19, 1, INT)
 tunings = new(16, 1, INT)
 
@@ -56,6 +69,20 @@ fn options_init() {
         $i + 1
     }
 
+    // Tempo buttons
+    $i = 0
+    while ($i < 4) {
+        if (tempo_delta[$i] < 0) {
+            sprintf($s, "%d", tempo_delta[$i])
+        } else {
+            sprintf($s, "+%d", tempo_delta[$i])
+        }
+        tempo_btn[$i] = add_btn(0, 0, 0, 20,
+            clone($s), nord4, nord6, 0x2040, tempo_callback)
+        tempo_btn[$i].val = tempo_delta[$i]
+        $i + 1
+    }
+
     // Temperament buttons
     $i = 0
     while ($i < 19) {
@@ -85,6 +112,16 @@ fn timesig_callback($sender) {
     tsigidx = $sender.idx
     roll_beat = timesigs[tsigidx] div 10
     roll_bar = timesigs[tsigidx] % 10 * roll_beat
+}
+
+fn clamp_tick_len() {
+    if (tick_len < 10) { tick_len = 10 }
+    if (tick_len > 2000) { tick_len = 2000 }
+}
+
+fn tempo_callback($sender) {
+    tick_len + $sender.val
+    clamp_tick_len()
 }
 
 fn tune_callback($sender) {
@@ -129,8 +166,19 @@ fn draw_options() {
         timesig_btn[tsigidx].alphas = 0xa088
     }
 
-    // Place tempo widget
+    // Place tempo widgets
     print("Tick length", roll_x + 6, roll_y + 39, nord6, LEFT)
+    $i = 0
+    while ($i < 4) {
+        tempo_btn[$i].x = $xs[tempo_btn_pos[$i]] + 1
+        tempo_btn[$i].y = roll_y + 28
+        tempo_btn[$i].w = $xs[tempo_btn_pos[$i] + 1] - tempo_btn[$i].x - 1
+        $i + 1
+    }
+
+    $s = ""
+    sprintf($s, "%d ms", tick_len)
+    print($s, roll_x + 80 + (roll_w - 86) / 2, roll_y + 39, nord6)
 
     // Track-specific settings
     // Place temperament buttons
