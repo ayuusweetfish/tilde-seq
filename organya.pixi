@@ -147,9 +147,25 @@ fn save_file($path) {
         $j = 0
         while ($j < $n) {
             put_uint32($f, $t[$j].x)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
             put_uint8($f, $t[$j].y)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
             put_uint8($f, $t[$j].len)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
             put_uint8($f, $t[$j].vol)
+            $j + 1
+        }
+        $j = 0
+        while ($j < $n) {
             put_uint8($f, $t[$j].pan)
             $j + 1
         }
