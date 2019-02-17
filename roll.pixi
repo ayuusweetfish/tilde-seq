@@ -730,6 +730,8 @@ fn roll_init_history() {
         roll_history[0][$i] = duplicate_track(roll_tracks[$i])
         $i + 1
     }
+    roll_hist_ptr = 0
+    roll_hist_top = 0
 }
 
 roll_init_history()
