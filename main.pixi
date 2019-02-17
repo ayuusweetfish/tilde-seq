@@ -121,6 +121,7 @@ menu_btns_bg[10] = nord8
 menu_btns_bg[11] = nord8
 
 menu_btns_text[1].cb = menu_open_file
+menu_btns_text[2].cb = menu_save_file
 menu_btns_text[3].cb = roll_undo
 menu_btns_text[4].cb = roll_redo
 menu_btns_text[5].cb = roll_cut

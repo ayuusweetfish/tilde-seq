@@ -16,6 +16,22 @@ fn read_uint32($f) {
     ret($r)
 }
 
+fn put_uint8($f, $val) {
+    fputc($val, $f)
+}
+
+fn put_uint16($f, $val) {
+    fputc($val & 0xff, $f)
+    fputc(($val >> 8) & 0xff, $f)
+}
+
+fn put_uint32($f, $val) {
+    fputc($val & 0xff, $f)
+    fputc(($val >> 8) & 0xff, $f)
+    fputc(($val >> 16) & 0xff, $f)
+    fputc(($val >> 24) & 0xff, $f)
+}
+
 fn load_file($path) {
     $f = fopen($path, "rb")
     if ($f == 0) {
@@ -101,6 +117,49 @@ fn load_file($path) {
     ret($org)
 }
 
+fn save_file($path) {
+    $f = fopen($path, "wb")
+    if ($f == 0) {
+        ret("Cannot open file")
+    }
+
+    fputs("Org-03", $f)
+    put_uint16($f, 16)
+    put_uint8($f, roll_bar div roll_beat)
+    put_uint8($f, roll_beat)
+    put_uint32($f, 0)
+    put_uint32($f, 0xffffffff)
+
+    $i = 0
+    while ($i < 16) {
+        put_uint16($f, 1000)
+        put_uint8($f, 0)
+        put_uint8($f, 0)
+        put_uint16($f, roll_tracks[$i].cnt)
+        $i + 1
+    }
+
+    $i = 0
+    while ($i < 16) {
+        $t = roll_tracks[$i]
+        $n = $t.cnt
+
+        $j = 0
+        while ($j < $n) {
+            put_uint32($f, $t[$j].x)
+            put_uint8($f, $t[$j].y)
+            put_uint8($f, $t[$j].len)
+            put_uint8($f, $t[$j].vol)
+            put_uint8($f, $t[$j].pan)
+            $j + 1
+        }
+
+        $i + 1
+    }
+
+    fclose($f)
+}
+
 fn menu_new_file() {
 }
 
@@ -114,6 +173,14 @@ fn menu_open_file() {
         } else {
             // TODO: Display error message
         }
+    }
+}
+
+fn menu_save_file() {
+    $path = file_dialog("Open", "org", "file_dialog_state")
+    if ($path != -1) {
+        save_file($path)
+        remove($path)
     }
 }
 
