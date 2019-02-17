@@ -210,4 +210,16 @@ fn popularize_editor($org) {
 
     roll_no_history = 0
     roll_init_history()
+
+    $i = 0
+    tsigidx = -1    // No buttons highlighted if combination is not supported
+    while ($i < TIMESIGS_CNT) {
+        if ($org.line == timesigs[$i] % 10 &&
+            $org.dot == timesigs[$i] div 10)
+        {
+            tsigidx = $i
+            break
+        }
+        $i + 1
+    }
 }
