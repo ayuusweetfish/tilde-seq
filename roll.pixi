@@ -262,10 +262,8 @@ while ($i < 16) {
 
 // Mask of selected tracks
 roll_track_sel = 1
-
-// A simple cache-like thing
+// First selected track
 roll_tid = 0
-roll_notes = roll_tracks[0]
 
 fn switch_track($t) {
     if (roll_ctrl) {
@@ -284,7 +282,6 @@ fn switch_track($t) {
         roll_track_sel = (1 << $t)
     }
     roll_tid = $t
-    roll_notes = roll_tracks[$t]
     roll_changed = 1
 }
 
@@ -302,6 +299,7 @@ fn roll_clear() {
 }
 
 fn add_note($x, $y, $len, $vol, $pan) {
+    $tid = roll_tid
     roll_remove_dup_attr($x)
 
     $n = new()
@@ -311,25 +309,29 @@ fn add_note($x, $y, $len, $vol, $pan) {
     $n.vol = $vol
     $n.pan = $pan
 
-    roll_notes[roll_tracks[roll_tid].cnt] = $n
-    roll_tracks[roll_tid].cnt + 1
+    $l = roll_tracks[$tid]
+    $l[$l.cnt] = $n
+    $l.cnt + 1
     ret($n)
 }
 
 fn remove_note($i) {
-    remove(roll_notes[$i])
-    roll_tracks[roll_tid].cnt - 1
-    roll_notes[$i] = roll_notes[roll_tracks[roll_tid].cnt]
+    $tid = roll_tid
+    $l = roll_tracks[$tid]
+    remove($l[$i])
+    $l.cnt - 1
+    $l[$i] = $l[$l.cnt]
 }
 
 // Finds whether a note exists at cell (x, y)
 // and updates global variables <roll_editing> and <roll_eside>
 fn roll_locate_note($x, $y) {
-    $cnt = roll_tracks[roll_tid].cnt
+    $l = roll_tracks[roll_tid]
+    $cnt = $l.cnt
     $i = 0
     roll_editing = -1
     while ($i < $cnt) {
-        $n = roll_notes[$i]
+        $n = $l[$i]
         if ($n.y == $y && $n.x <= $x && $n.x + $n.len > $x) {
             roll_editing = $n
             roll_eside = -1
@@ -342,10 +344,11 @@ fn roll_locate_note($x, $y) {
 }
 
 fn edit_attr($prop, $x, $val) {
-    $cnt = roll_tracks[roll_tid].cnt
+    $l = roll_tracks[roll_tid]
+    $cnt = $l.cnt
     $i = 0
     while ($i < $cnt) {
-        $n = roll_notes[$i]
+        $n = $l[$i]
         if ($n.x == $x) {
             set_prop($n, $prop, $val)
             ret
@@ -365,10 +368,11 @@ fn edit_attr($prop, $x, $val) {
 fn roll_monophonize($m) {
     roll_remove_dup_attr($m.x)
 
-    $cnt = roll_tracks[roll_tid].cnt
+    $l = roll_tracks[roll_tid]
+    $cnt = $l.cnt
     $i = 0
     while ($i < $cnt) {
-        $n = roll_notes[$i]
+        $n = $l[$i]
         if ($n != $m && $n.len != 0 &&
             $n.x + $n.len > $m.x && $m.x + $m.len > $n.x)
         {
@@ -404,10 +408,11 @@ fn roll_monophonize($m) {
 // For the first selected track,
 // remove attributive notes at position $x, if any
 fn roll_remove_dup_attr($x) {
-    $cnt = roll_tracks[roll_tid].cnt
+    $l = roll_tracks[roll_tid]
+    $cnt = $l.cnt
     $i = 0
     while ($i < $cnt) {
-        $n = roll_notes[$i]
+        $n = $l[$i]
         if ($n.len == 0 && $n.x == $x) {
             remove_note($i)
             $cnt - 1
@@ -424,10 +429,11 @@ fn roll_break($x) {
     while ($j < 16) {
         if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
 
-        $cnt = roll_tracks[$j].cnt
+        $l = roll_tracks[$j]
+        $cnt = $l.cnt
         $i = 0
         while ($i < $cnt) {
-            $n = roll_tracks[$j][$i]
+            $n = $l[$i]
             if ($n.x < $x && $n.x + $n.len > $x) {
                 add_note($x, $n.y, $n.x + $n.len - $x, $n.vol, $n.pan)
                 $n.len = $x - $n.x
@@ -467,11 +473,12 @@ fn roll_copy() {
     while ($j < 16) {
         if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
 
-        $cnt = roll_tracks[$j].cnt
+        $l = roll_tracks[$j]
+        $cnt = $l.cnt
         $i = 0
         $new = 0
         while ($i < $cnt) {
-            $n = roll_tracks[$j][$i]
+            $n = $l[$i]
             if ($n.x >= $x1 && $n.x < $x2) {
                 roll_clip[$j][$new] = clone($n)
                 roll_clip[$j][$new].x - $x1
@@ -509,10 +516,11 @@ fn roll_paste() {
     while ($j < 16) {
         if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
 
-        $cnt = roll_tracks[$j].cnt
+        $l = roll_tracks[$j]
+        $cnt = $l.cnt
         $i = 0
         while ($i < $cnt) {
-            $n = roll_tracks[$j][$i]
+            $n = $l[$i]
             if ($n.x >= $x1) {
                 $n.x + roll_clip_len
             }
@@ -544,10 +552,11 @@ fn roll_shrink() {
     while ($j < 16) {
         if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
 
-        $cnt = roll_tracks[$j].cnt
+        $l = roll_tracks[$j]
+        $cnt = $l.cnt
         $i = 0
         while ($i < $cnt) {
-            $n = roll_tracks[$j][$i]
+            $n = $l[$i]
             if ($n.x >= $x2) {
                 $n.x - ($x2 - $x1 + 1)
             } else {
@@ -577,10 +586,11 @@ fn roll_clearsel() {
     while ($j < 16) {
         if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
 
-        $cnt = roll_tracks[$j].cnt
+        $l = roll_tracks[$j]
+        $cnt = $l.cnt
         $i = 0
         while ($i < $cnt) {
-            $n = roll_tracks[$j][$i]
+            $n = $l[$i]
             if ($n.x >= $x1 && $n.x <= $x2) {
                 // FIXME: carry out removal on the correct track
                 remove_note($i)
@@ -595,12 +605,13 @@ fn roll_clearsel() {
 }
 
 fn draw_track($t, $x_sta, $x_fin, $y_sta, $y_fin) {
-    $cnt = roll_tracks[$t].cnt
+    $l = roll_tracks[$t]
+    $cnt = $l.cnt
     $i = 0
     $col = track_colours[$t]
 
     while ($i < $cnt) {
-        $n = roll_tracks[$t][$i]
+        $n = $l[$i]
 
         if ($n.x <= $x_fin && $n.x + $n.len - 1 >= $x_sta &&
             $n.y >= $y_sta && $n.y <= $y_fin)
@@ -621,13 +632,14 @@ fn round($x) {
 }
 
 fn draw_track_attr($t, $x_sta, $x_fin, $y_sta, $y_fin) {
-    $cnt = roll_tracks[$t].cnt
+    $l = roll_tracks[$t]
+    $cnt = $l.cnt
     $i = 0
     $col = get_blend(track_colours[$t], WHITE, 96)
 
     transp(192)
     while ($i < $cnt) {
-        $n = roll_tracks[$t][$i]
+        $n = $l[$i]
 
         if ($n.x <= $x_fin && $n.x >= $x_sta) {
             if ($n.vol != NOCHANGE) {
