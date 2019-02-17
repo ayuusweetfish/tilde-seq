@@ -107,7 +107,6 @@ fn menu_new_file() {
 fn menu_open_file() {
     $path = file_dialog("Open", "org", "file_dialog_state")
     if ($path != -1) {
-        printf("%s\n", $path)
         $result = load_file($path)
         remove($path)
         if ($result.succeeded) {
@@ -127,17 +126,15 @@ fn popularize_editor($org) {
     $i = 0
     while ($i < 16) {
         roll_ctrl = 0
-        switch_track($i)
 
         $n = $org.tracks[$i].note_cnt
         $l = $org.tracks[$i].note_list
         $j = 0
         while ($j < $n) {
             $note = $l[$j]
-            add_note($note.x, $note.y, $note.len, $note.vol, $note.pan)
+            add_note($i, $note.x, $note.y, $note.len, $note.vol, $note.pan)
             $j + 1
         }
         $i + 1
     }
-    switch_track(0)
 }
