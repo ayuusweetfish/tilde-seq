@@ -333,13 +333,16 @@ while (running) {
                 roll_mouse_move(EVT[EVT_X], EVT[EVT_Y])
             }
         }
+        if (EVT[EVT_TYPE] == EVT_QUIT) {
+            try_autosave(1)
+        }
     }
 
     $t = get_timer(0)
     roll_tick($t - last_time)
     last_time = $t
 
-    try_autosave()
+    try_autosave(0)
 
     if (notif_msg != 0 && $t >= notif_time + NOTIF_DUR) {
         notif_msg = 0

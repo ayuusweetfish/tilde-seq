@@ -226,10 +226,10 @@ fn boot_workspace() {
     }
 }
 
-fn try_autosave() {
+fn try_autosave($forced) {
     $t = get_timer(0)
     // Save every minute
-    if (last_save < $t - 60000) {
+    if ($forced || last_save < $t - 60000) {
         save_file("2:/workspace.org")
         last_save = $t
         send_notif("Workspace autosaved", nord14)
