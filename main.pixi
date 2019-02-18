@@ -38,6 +38,7 @@ include "roll.pixi"
 include "options.pixi"
 
 include "organya.pixi"
+include "sampler.pixi"
 
 // Notifications
 notif_msg = 0

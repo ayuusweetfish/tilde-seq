@@ -1,0 +1,39 @@
+osctab = new(100, 1, INT)
+drumtab = new(42, 1, INT)
+
+// Raw PCM, 22050 Hz, signed 8-bit, mono
+oscdata = load("Wave/Wave.dat")
+if (get_xsize(oscdata) != 25600) { halt }
+
+$i = 0
+while ($i < 100) {
+    osctab[$i] = new(256, 1, INT8)
+    copy(osctab[$i], oscdata, 0, 256 * $i, 256)
+    $i + 1
+}
+
+$path = ""
+$i = 0
+while ($i < 42) {
+    $real = clone(drum_names[$i])
+    $len = get_xsize($real)
+    if ($real[$len - 1] == '*') {
+        $real[$len - 1] = '\0'
+    }
+    sprintf($path, "Wave/%s.wav", $real)
+    drumtab[$i] = load($path)
+    $i + 1
+}
+remove($path)
+
+// TODO: Implement cubic interpolation (tabread4~)
+fn osc_sample($instr, $phase) {
+    ret(osctab[$instr][floor($phase * 256)])
+}
+
+fn drum_sample($instr, $time) {
+}
+
+fn drum_sample_phase($instr, $phase) {
+    ret(drumtab[$instr][floor($phase * get_xsize(drumtab[$instr]))])
+}

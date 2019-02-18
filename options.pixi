@@ -329,14 +329,17 @@ fn draw_options() {
     $instruments_cnt = 100
     $columns = 10
     $b = wave_btn
+    $sampler = osc_sample
     if (roll_tid >= 8) {
         $instruments_cnt = 42
         $columns = 6
         $b = drum_btn
+        $sampler = drum_sample_phase
     }
     $xs = divide($btns_x, $btns_w, $columns)
     $ys = divide($btns_y, $btns_h, 10)
 
+    transp(192) // For sample dots
     $i = 0
     while ($i < $instruments_cnt) {
         $idx = $i
@@ -349,6 +352,14 @@ fn draw_options() {
         $b[$i].h = $ys[$r + 1] - $ys[$r] - 2
         $b[$i].bg = nord4
         $b[$i].alphas = 0x2040
+        // TODO: Draw drum samples
+        $j = 0
+        while ($j < $b[$i].w) {
+            $phase = $j / $b[$i].w
+            $smp_y = (127 - $sampler($i, $phase)) / 256   // [0, 1)
+            dot($b[$i].x + $j, $b[$i].y + floor($smp_y * $b[$i].h), nord7)
+            $j + 1
+        }
         $i + 1
     }
     remove($xs)
@@ -358,6 +369,7 @@ fn draw_options() {
     $b[instruments[roll_tid]].bg = $c
     $b[instruments[roll_tid]].alphas = 0xa088
 
+    transp(255)
     if (roll_tid >= 8) {
         print("* = Org-3 only", roll_x + 6, roll_y + roll_h - 17, nord6, LEFT)
     }
