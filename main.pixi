@@ -309,7 +309,8 @@ while (running) {
                     if (in_options) {
                         opt_mouse_down(EVT[EVT_X], EVT[EVT_Y])
                     } else {
-                        roll_mouse_down(EVT[EVT_X], EVT[EVT_Y])
+                        roll_mouse_down(EVT[EVT_X], EVT[EVT_Y],
+                            EVT[EVT_KEY] == KEY_MOUSE_RIGHT)
                     }
                     is_down = 1
                 }
