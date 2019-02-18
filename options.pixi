@@ -34,7 +34,93 @@ tune_btn = new(19, 1, INT)
 tunings = new(16, 1, INT)
 
 wave_btn = new(100, 1, INT)
-drum_btn = new(100, 12, INT)
+drum_btn = new(42, 1, INT)
+
+drum_names = new(42, 1, INT)
+drum_names[0] = "Bass01"
+drum_names[0].pos = 0
+drum_names[1] = "Bass02"
+drum_names[1].pos = 1
+drum_names[2] = "Snare01"
+drum_names[2].pos = 29
+drum_names[3] = "Snare02"
+drum_names[3].pos = 30
+drum_names[4] = "Tom01"
+drum_names[4].pos = 37
+drum_names[5] = "HiClose"
+drum_names[5].pos = 13
+drum_names[6] = "HiOpen"
+drum_names[6].pos = 18
+drum_names[7] = "Crash"
+drum_names[7].pos = 11
+drum_names[8] = "Per01"
+drum_names[8].pos = 23
+drum_names[9] = "Per02"
+drum_names[9].pos = 24
+drum_names[10] = "Bass03"
+drum_names[10].pos = 2
+drum_names[11] = "Tom02"
+drum_names[11].pos = 38
+drum_names[12] = "Bass04*"
+drum_names[12].pos = 3
+drum_names[13] = "Bass05*"
+drum_names[13].pos = 4
+drum_names[14] = "Snare03*"
+drum_names[14].pos = 31
+drum_names[15] = "Snare04*"
+drum_names[15].pos = 32
+drum_names[16] = "HiClose02*"
+drum_names[16].pos = 14
+drum_names[17] = "HiOpen02*"
+drum_names[17].pos = 19
+drum_names[18] = "HiClose03*"
+drum_names[18].pos = 15
+drum_names[19] = "HiOpen03*"
+drum_names[19].pos = 20
+drum_names[20] = "Crash02*"
+drum_names[20].pos = 12
+drum_names[21] = "RevSym01*"
+drum_names[21].pos = 27
+drum_names[22] = "Ride01*"
+drum_names[22].pos = 28
+drum_names[23] = "Tom03*"
+drum_names[23].pos = 39
+drum_names[24] = "Tom04*"
+drum_names[24].pos = 40
+drum_names[25] = "OrcDrm01*"
+drum_names[25].pos = 22
+drum_names[26] = "Bell*"
+drum_names[26].pos = 8
+drum_names[27] = "Cat*"
+drum_names[27].pos = 9
+drum_names[28] = "Bass06*"
+drum_names[28].pos = 5
+drum_names[29] = "Bass07*"
+drum_names[29].pos = 6
+drum_names[30] = "Snare05*"
+drum_names[30].pos = 33
+drum_names[31] = "Snare06*"
+drum_names[31].pos = 34
+drum_names[32] = "Snare07*"
+drum_names[32].pos = 35
+drum_names[33] = "Tom05*"
+drum_names[33].pos = 41
+drum_names[34] = "HiOpen04*"
+drum_names[34].pos = 21
+drum_names[35] = "HiClose04*"
+drum_names[35].pos = 16
+drum_names[36] = "Clap01*"
+drum_names[36].pos = 10
+drum_names[37] = "Pesi01*"
+drum_names[37].pos = 25
+drum_names[38] = "Quick01*"
+drum_names[38].pos = 26
+drum_names[39] = "Bass08*"
+drum_names[39].pos = 7
+drum_names[40] = "Snare08*"
+drum_names[40].pos = 36
+drum_names[41] = "HiClose05*"
+drum_names[41].pos = 17
 
 fn reset_instruments() {
     $i = 0
@@ -96,6 +182,14 @@ fn options_init() {
     }
 
     // Instrument buttons
+    $i = 0
+    while ($i < 42) {
+        drum_btn[$i] = add_btn(0, 0, 0, 0, drum_names[$i], 0, nord6, 0, wave_callback)
+        drum_btn[$i].idx = $i
+        drum_btn[$i].pos = drum_names[$i].pos
+        $i + 1
+    }
+
     $i = 0
     while ($i < 100) {
         sprintf($s, "Wave %02d", $i)
@@ -211,27 +305,53 @@ fn draw_options() {
     $btns_y = roll_y + 72
     $btns_w = roll_w - 12
     $btns_h = roll_h - 78
-    $xs = divide($btns_x, $btns_w, 10)
+
+    $i = 0
+    while ($i < 42) {
+        drum_btn[$i].w = 0
+        $i + 1
+    }
+    $i = 0
+    while ($i < 100) {
+        wave_btn[$i].w = 0
+        $i + 1
+    }
+
+    $instruments_cnt = 100
+    $columns = 10
+    $b = wave_btn
+    if (roll_tid >= 8) {
+        $instruments_cnt = 42
+        $columns = 6
+        $b = drum_btn
+    }
+    $xs = divide($btns_x, $btns_w, $columns)
     $ys = divide($btns_y, $btns_h, 10)
 
     $i = 0
-    while ($i < 100) {
-        $r = $i div 10
-        $c = $i % 10
-        wave_btn[$i].x = $xs[$c] + 1
-        wave_btn[$i].y = $ys[$r] + 1
-        wave_btn[$i].w = $xs[$c + 1] - $xs[$c] - 2
-        wave_btn[$i].h = $ys[$r + 1] - $ys[$r] - 2
-        wave_btn[$i].bg = nord4
-        wave_btn[$i].alphas = 0x2040
+    while ($i < $instruments_cnt) {
+        $idx = $i
+        if (roll_tid >= 8) { $idx = drum_btn[$i].pos }
+        $r = $idx div $columns
+        $c = $idx % $columns
+        $b[$i].x = $xs[$c] + 1
+        $b[$i].y = $ys[$r] + 1
+        $b[$i].w = $xs[$c + 1] - $xs[$c] - 2
+        $b[$i].h = $ys[$r + 1] - $ys[$r] - 2
+        $b[$i].bg = nord4
+        $b[$i].alphas = 0x2040
         $i + 1
     }
     remove($xs)
     remove($ys)
 
     $c = track_colours[roll_tid]
-    wave_btn[instruments[roll_tid]].bg = $c
-    wave_btn[instruments[roll_tid]].alphas = 0xa088
+    $b[instruments[roll_tid]].bg = $c
+    $b[instruments[roll_tid]].alphas = 0xa088
+
+    if (roll_tid >= 8) {
+        print("* = Org-3 only", roll_x + 6, roll_y + roll_h - 17, nord6, LEFT)
+    }
 }
 
 opt_tempo_down = 0

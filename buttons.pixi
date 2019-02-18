@@ -1,4 +1,4 @@
-btns = new(192)
+btns = new(256)
 btns_cnt = 0
 
 btn_sel_id = -1
@@ -26,6 +26,7 @@ fn draw_btns() {
     $i = 0
     while ($i < btns_cnt) {
         $cur = btns[$i]
+        if ($cur.w == 0) { $i + 1 continue }
         if (btn_in && $cur == btn_sel_id) {
             transp(($cur.alphas >> 0) & 0xff)
         } else {
@@ -42,8 +43,8 @@ fn draw_btns() {
 }
 
 fn btn_check_in($x, $y, $i) {
-    ret($x >= $i.x && $x <= $i.x + $i.w &&
-        $y >= $i.y && $y <= $i.y + $i.h)
+    ret($x >= $i.x && $x < $i.x + $i.w &&
+        $y >= $i.y && $y < $i.y + $i.h)
 }
 
 fn btn_mouse_down($x, $y) {
