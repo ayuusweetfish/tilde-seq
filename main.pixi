@@ -272,24 +272,27 @@ while (running) {
                 } else {
                     btn_mouse_down(EVT[EVT_X], EVT[EVT_Y])
                     if (in_options) {
+                        opt_mouse_down(EVT[EVT_X], EVT[EVT_Y])
                     } else {
                         roll_mouse_down(EVT[EVT_X], EVT[EVT_Y])
-                        is_down = 1
                     }
+                    is_down = 1
                 }
             }
         }
         if (EVT[EVT_TYPE] == EVT_MOUSEBUTTONUP) {
             btn_mouse_up(EVT[EVT_X], EVT[EVT_Y])
             if (in_options) {
+                opt_mouse_up(EVT[EVT_X], EVT[EVT_Y])
             } else {
                 roll_mouse_up(EVT[EVT_X], EVT[EVT_Y])
-                is_down = 0
             }
+            is_down = 0
         }
         if (is_down && EVT[EVT_TYPE] == EVT_MOUSEMOVE) {
             btn_mouse_move(EVT[EVT_X], EVT[EVT_Y])
             if (in_options) {
+                opt_mouse_move(EVT[EVT_X], EVT[EVT_Y])
             } else {
                 roll_mouse_move(EVT[EVT_X], EVT[EVT_Y])
             }

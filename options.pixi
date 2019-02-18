@@ -233,3 +233,34 @@ fn draw_options() {
     wave_btn[instruments[roll_tid]].bg = $c
     wave_btn[instruments[roll_tid]].alphas = 0xa088
 }
+
+opt_tempo_down = 0
+
+fn opt_mouse_move($x, $y) {
+    if (opt_tempo_down == 0) { ret }
+
+    $xs = divide(roll_x + 80, roll_w - 86, 8)
+    $bar_x = $xs[2] + 1
+    $bar_w = $xs[6] - $xs[2] - 2
+
+    tick_len = round(2000 * ($x - $bar_x) / $bar_w)
+    clamp_tick_len()
+    changed = 1
+}
+
+fn opt_mouse_down($x, $y) {
+    $xs = divide(roll_x + 80, roll_w - 86, 8)
+    $bar_x = $xs[2] + 1
+    $bar_w = $xs[6] - $xs[2] - 2
+
+    if ($x >= $bar_x && $x < $bar_x + $bar_w &&
+        $y >= roll_y + 28 && $y < roll_y + 48)
+    {
+        opt_tempo_down = 1
+        opt_mouse_move($x, $y)
+    }
+}
+
+fn opt_mouse_up($x, $y) {
+    opt_tempo_down = 0
+}
