@@ -62,9 +62,7 @@ fn options_init() {
     $s = ""
     while ($i < TIMESIGS_CNT) {
         sprintf($s, "%d:%d", timesigs[$i] % 10, timesigs[$i] div 10)
-        timesig_btn[$i] = add_btn(
-            0, 0, 0, 20,
-            clone($s), nord4, nord6, 0x2040, timesig_callback)
+        timesig_btn[$i] = add_btn(0, 0, 0, 20, clone($s), 0, nord6, 0, timesig_callback)
         timesig_btn[$i].idx = $i
         $i + 1
     }
@@ -101,7 +99,7 @@ fn options_init() {
     $i = 0
     while ($i < 100) {
         sprintf($s, "Wave %02d", $i)
-        wave_btn[$i] = add_btn(0, 0, 10, 10, clone($s), nord4, nord6, 0x2040, wave_callback)
+        wave_btn[$i] = add_btn(0, 0, 0, 0, clone($s), 0, nord6, 0, wave_callback)
         wave_btn[$i].idx = $i
         $i + 1
     }
@@ -162,7 +160,7 @@ fn draw_options() {
     }
 
     if (tsigidx != -1) {
-        timesig_btn[tsigidx].bg = nord10
+        timesig_btn[tsigidx].bg = nord9
         timesig_btn[tsigidx].alphas = 0xa088
     }
 
@@ -176,8 +174,19 @@ fn draw_options() {
         $i + 1
     }
 
+    $bar_x = $xs[2] + 1
+    $bar_w = $xs[6] - $xs[2] - 2
+    $bar_w0 = round($bar_w * tick_len / 2000)
+
+    transp(0xa0)
+    fbox($bar_x, roll_y + 28, $bar_w0, 20, nord9)
+
+    transp(0x20)
+    fbox($bar_x + $bar_w0, roll_y + 28, $bar_w - $bar_w0, 20, nord6)
+
     $s = ""
     sprintf($s, "%d ms", tick_len)
+    transp(255)
     print($s, roll_x + 80 + (roll_w - 86) / 2, roll_y + 39, nord6)
 
     // Track-specific settings
