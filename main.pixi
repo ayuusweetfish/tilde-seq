@@ -47,11 +47,14 @@ last_track_btn = 0
 fn update_track_btns() {
     $top = -WINDOW_YSIZE div 2 + 19
     $bottom = roll_y + roll_h - roll_vol_h - roll_pan_h
+    if (in_options) {
+        $bottom = roll_y + roll_h
+    }
     // Place the last pressed track button at the anchor
     $offset = floor(($top - $bottom) * 0.382) + last_track_btn * 19 + 10
     $max = 19 * 16 - ($bottom - $top)
-    if ($offset < 0) { $offset = 0 }
     if ($offset > $max) { $offset = $max }
+    if ($offset < 0) { $offset = 0 }
 
     $i = 0
     while ($i < 16) {
@@ -138,6 +141,7 @@ menu_btns_text[10].cb = {
         menu_btns[10].text = "Options"
         btns_cnt = normal_btn_cnt
     }
+    update_track_btns()
     changed = 1
 }
 menu_btns_text[11].cb = {
@@ -198,16 +202,18 @@ fn draw() {
 
     draw_btns()
 
-    transp(240)
-    fbox(-WINDOW_XSIZE div 2, roll_y + roll_h - roll_vol_h - roll_pan_h,
-        19, roll_pan_h, nord9)
-    fbox(-WINDOW_XSIZE div 2, roll_y + roll_h - roll_vol_h,
-        19, roll_vol_h, nord7)
-    transp(255)
-    print("Pan", -WINDOW_XSIZE div 2 + 1,
-        roll_y + roll_h - roll_vol_h - roll_pan_h div 2, nord0, LEFT)
-    print("Vol", -WINDOW_XSIZE div 2 + 1,
-        roll_y + roll_h - roll_vol_h div 2, nord0, LEFT)
+    if (in_options == 0) {
+        transp(240)
+        fbox(-WINDOW_XSIZE div 2, roll_y + roll_h - roll_vol_h - roll_pan_h,
+            19, roll_pan_h, nord9)
+        fbox(-WINDOW_XSIZE div 2, roll_y + roll_h - roll_vol_h,
+            19, roll_vol_h, nord7)
+        transp(255)
+        print("Pan", -WINDOW_XSIZE div 2 + 1,
+            roll_y + roll_h - roll_vol_h - roll_pan_h div 2, nord0, LEFT)
+        print("Vol", -WINDOW_XSIZE div 2 + 1,
+            roll_y + roll_h - roll_vol_h div 2, nord0, LEFT)
+    }
 }
 
 last_time = 0

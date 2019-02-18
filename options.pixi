@@ -36,6 +36,7 @@ tunings = new(16, 1, INT)
 wave_btn = new(100, 1, INT)
 drum_btn = new(42, 1, INT)
 
+// See drum_list.txt and drum_list.py for code generation
 drum_names = new(42, 1, INT)
 drum_names[0] = "Bass01"
 drum_names[0].pos = 0
@@ -285,20 +286,28 @@ fn draw_options() {
 
     // Track-specific settings
     // Place temperament buttons
-    print("Fine tune", roll_x + 6, roll_y + 61, nord6, LEFT)
-    $xs = divide($btns_x, $btns_w, 19)
-    $i = 0
-    while ($i < 19) {
-        tune_btn[$i].x = $xs[$i] + 1
-        tune_btn[$i].y = roll_y + 50
-        tune_btn[$i].w = $xs[$i + 1] - $xs[$i] - 2
-        tune_btn[$i].bg = nord4
-        tune_btn[$i].alphas = 0x2040
-        $i + 1
+    if (roll_tid >= 8) {
+        $i = 0
+        while ($i < 19) {
+            tune_btn[$i].w = 0
+            $i + 1
+        }
+    } else {
+        print("Fine tune", roll_x + 6, roll_y + 61, nord6, LEFT)
+        $xs = divide($btns_x, $btns_w, 19)
+        $i = 0
+        while ($i < 19) {
+            tune_btn[$i].x = $xs[$i] + 1
+            tune_btn[$i].y = roll_y + 50
+            tune_btn[$i].w = $xs[$i + 1] - $xs[$i] - 2
+            tune_btn[$i].bg = nord4
+            tune_btn[$i].alphas = 0x2040
+            $i + 1
+        }
+        $idx = round(tunings[roll_tid] / 100) - 1
+        tune_btn[$idx].bg = track_colours[roll_tid]
+        tune_btn[$idx].alphas = 0xa088
     }
-    $idx = round(tunings[roll_tid] / 100) - 1
-    tune_btn[$idx].bg = track_colours[roll_tid]
-    tune_btn[$idx].alphas = 0xa088
 
     // Place instrument buttons
     $btns_x = roll_x + 6
