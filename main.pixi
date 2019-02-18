@@ -42,8 +42,8 @@ include "organya.pixi"
 // Notifications
 notif_msg = 0
 notif_colour = 0
+notif_time = 0
 NOTIF_DUR = 5000
-notif_time = -NOTIF_DUR - 1
 
 fn send_notif($msg, $colour) {
     notif_msg = $msg
@@ -340,9 +340,8 @@ while (running) {
 
     try_autosave()
 
-    if ($t >= notif_time + NOTIF_DUR) {
+    if (notif_msg != 0 && $t >= notif_time + NOTIF_DUR) {
         notif_msg = 0
-        notif_time = -NOTIF_DUR - 1
         changed = 1
     }
 
