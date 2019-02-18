@@ -39,6 +39,21 @@ include "options.pixi"
 
 include "organya.pixi"
 
+// Notifications
+notif_msg = 0
+notif_colour = 0
+NOTIF_DUR = 5000
+notif_time = -NOTIF_DUR - 1
+
+fn send_notif($msg, $colour) {
+    notif_msg = $msg
+    notif_colour = $colour
+    notif_time = get_timer(0)
+    changed = 1
+}
+
+send_notif("Hi there!", nord12)
+
 track_btns = new(16)
 track_hotkeys = "QWERTYUI"
 
@@ -124,6 +139,7 @@ menu_btns_bg[9] = nord8
 menu_btns_bg[10] = nord8
 menu_btns_bg[11] = nord8
 
+menu_btns_text[0].cb = menu_new_file
 menu_btns_text[1].cb = menu_open_file
 menu_btns_text[2].cb = menu_save_file
 menu_btns_text[3].cb = roll_undo
@@ -213,6 +229,19 @@ fn draw() {
             roll_y + roll_h - roll_vol_h - roll_pan_h div 2, nord0, LEFT)
         print("Vol", -WINDOW_XSIZE div 2 + 1,
             roll_y + roll_h - roll_vol_h div 2, nord0, LEFT)
+    }
+
+    if (notif_msg != 0) {
+        $w = get_text_xsize(notif_msg)
+        $h = get_text_ysize(notif_msg)
+        transp(216)
+        fbox(WINDOW_XSIZE div 2 - $w - 24,
+            WINDOW_YSIZE div 2 - $h - 30,
+            $w + 15, $h + 15, notif_colour)
+        transp(255)
+        print(notif_msg,
+            WINDOW_XSIZE div 2 - 16, WINDOW_YSIZE div 2 - 22,
+            nord6, BOTTOM | RIGHT)
     }
 }
 
@@ -308,6 +337,12 @@ while (running) {
     $t = get_timer(0)
     roll_tick($t - last_time)
     last_time = $t
+
+    if ($t >= notif_time + NOTIF_DUR) {
+        notif_msg = 0
+        notif_time = -NOTIF_DUR - 1
+        changed = 1
+    }
 
     changed = changed || btn_changed || roll_changed
     btn_changed = 0

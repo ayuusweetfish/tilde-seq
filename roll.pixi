@@ -526,6 +526,11 @@ fn roll_clear_clipboard() {
 }
 
 fn roll_paste() {
+    if (roll_clip_len == 0) {
+        send_notif("Clipboard empty", nord13)
+        ret
+    }
+
     sort_sel_endpts()
     $x1 = roll_sside
     $x2 = roll_sfin

@@ -177,6 +177,16 @@ fn save_file($path) {
 }
 
 fn menu_new_file() {
+    roll_clear()
+    roll_init_history()
+
+    roll_bar = 16
+    roll_beat = 4
+    tsigidx = 0
+    tick_len = 100
+    reset_instruments()
+
+    send_notif("All reset", nord15)
 }
 
 fn menu_open_file() {
@@ -186,8 +196,9 @@ fn menu_open_file() {
         remove($path)
         if ($result.succeeded) {
             popularize_editor($result)
+            send_notif("File opened", nord14)
         } else {
-            // TODO: Display error message
+            send_notif($result, nord11)
         }
     }
 }
@@ -197,6 +208,7 @@ fn menu_save_file() {
     if ($path != -1) {
         save_file($path)
         remove($path)
+        send_notif("File saved", nord14)
     }
 }
 
