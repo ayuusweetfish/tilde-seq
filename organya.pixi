@@ -212,6 +212,33 @@ fn menu_save_file() {
     }
 }
 
+last_save = 0
+
+fn boot_workspace() {
+    $result = load_file("2:/workspace.org")
+    if ($result.succeeded) {
+        // Load the saved workspace
+        popularize_editor($result)
+        send_notif("Welcome back!", nord12)
+    } else {
+        // Most probably first-time bootup
+        send_notif("Nice to meet you!", nord12)
+    }
+}
+
+fn try_autosave() {
+    $t = get_timer(0)
+    // Save every minute
+    if (last_save < $t - 60000) {
+        save_file("2:/workspace.org")
+        last_save = $t
+        send_notif("Workspace autosaved", nord14)
+        ret(1)
+    } else {
+        ret(0)
+    }
+}
+
 fn popularize_editor($org) {
     roll_clear()
     roll_no_history = 1

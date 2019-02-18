@@ -52,7 +52,7 @@ fn send_notif($msg, $colour) {
     changed = 1
 }
 
-send_notif("Hi there!", nord12)
+boot_workspace()
 
 track_btns = new(16)
 track_hotkeys = "QWERTYUI"
@@ -337,6 +337,8 @@ while (running) {
     $t = get_timer(0)
     roll_tick($t - last_time)
     last_time = $t
+
+    try_autosave()
 
     if ($t >= notif_time + NOTIF_DUR) {
         notif_msg = 0
