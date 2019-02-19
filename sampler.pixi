@@ -37,3 +37,83 @@ fn drum_sample($instr, $time) {
 fn drum_sample_phase($instr, $phase) {
     ret(drumtab[$instr][floor($phase * get_xsize(drumtab[$instr]))])
 }
+
+track_freq = new(16, 1, INT16)  // in Hz; 0 means note off
+track_vol = new(16, 1, INT8)    // [0, 255]
+track_pan = new(16, 1, INT8)    // [0, 12]
+track_phase = new(16, 1, INT32) // in samples; divide by 2^16
+clean(track_freq)
+
+// -1 on any parameter means no change
+fn note_on($tid, $freq, $vol, $pan) {
+    if (track_freq[$tid] == 0) {
+        // Reset phase at onset
+        track_phase = 0
+    }
+    if ($freq != -1) { track_freq[$tid] = $freq }
+    if ($vol != -1) { track_vol[$tid] = $vol }
+    if ($pan != -1) { track_pan[$tid] = $pan }
+}
+
+note_on(0, 440, 0x40, 6)
+
+fn note_off($tid) {
+    track_freq[$tid] = 0
+}
+
+aud_buf0 = -1
+aud_buf1 = -1
+aud_buf2 = -1
+aud_buf3 = -1
+smpconf = new(SMP_INFO_SIZE, 1, INT32)
+
+SMP_LEN = 256 * 65536
+
+fn audio_callback($stream, $userdata, $channels, $frames,
+    $output_time_in_system_ticks, $in_channels, $latency_in_frames)
+{
+    if (aud_buf0 == -1) {
+        aud_buf0 = new($frames, 1, INT8)
+        aud_buf1 = new($frames, 1, INT8)
+        aud_buf2 = new($frames, 1, INT8)
+        aud_buf3 = new($frames, 1, INT8)
+    }
+
+    clean(aud_buf0)
+    clean(aud_buf1)
+
+    $i = 0
+    while ($i < 8) {
+        if (track_freq[$i] == 0) { $i + 1 continue }
+
+        $delta = 188888
+
+        smpconf[SMP_DEST] = aud_buf2
+        smpconf[SMP_DEST_OFF] = 0
+        smpconf[SMP_DEST_LEN] = $frames
+        smpconf[SMP_SRC] = osctab[0]
+        smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
+        smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
+        smpconf[SMP_SRC_SIZE] = 0
+        smpconf[SMP_LOOP] = 0
+        smpconf[SMP_LOOP_LEN] = 256
+        smpconf[SMP_VOL1] = 30000
+        smpconf[SMP_VOL2] = 30000
+        smpconf[SMP_DELTA] = $delta
+        smpconf[SMP_FLAGS] = SMP_FLAG_INTERP4
+        sampler(smpconf)
+
+        op_cc(OP_SADD, aud_buf0, aud_buf2)
+
+        $increment = $frames * $delta
+        track_phase[$i] =
+            (track_phase[$i] + $increment) % SMP_LEN
+        $i + 1
+    }
+
+    copy($channels[0], aud_buf0)
+    copy($channels[1], aud_buf0)
+    ret(1)
+}
+
+set_audio_callback(audio_callback, 0, 22050, INT8, 2, AUDIO_FLAG_INTERP2)
