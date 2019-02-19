@@ -115,6 +115,8 @@ fn audio_callback($stream, $userdata, $channels, $frames,
         op_cc(OP_SADD, aud_buf0, aud_buf2)
 
         smpconf[SMP_DEST] = aud_buf3
+        smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
+        smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
         smpconf[SMP_VOL1] = round($vol * 256 * $pan / 12)
         smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
         sampler(smpconf)
