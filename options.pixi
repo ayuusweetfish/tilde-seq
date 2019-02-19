@@ -1,6 +1,7 @@
 in_options = 0
 
-instruments = new(16, 1, INT8)
+// Tracks 16 and 17 are for preview
+instruments = new(18, 1, INT8)
 
 // Initialize
 TIMESIGS_CNT = 8
@@ -408,15 +409,15 @@ fn opt_mouse_down($x, $y) {
     }
 
     if (btn_sel_id.bank == 1) {
-        note_on_tmp(0, btn_sel_id.idx)
+        note_preview_instr(16, btn_sel_id.idx)
     }
     if (btn_sel_id.bank == 2) {
-        note_on_tmp(8, btn_sel_id.idx)
+        note_preview_instr(17, btn_sel_id.idx)
     }
 }
 
 fn opt_mouse_up($x, $y) {
     opt_tempo_down = 0
-    note_off(0)
-    note_off(15)
+    note_off(16)
+    note_off(17)
 }
