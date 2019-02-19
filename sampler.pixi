@@ -47,6 +47,7 @@ track_vol = new(16, 1, INT8)    // [0, 255]
 track_pan = new(16, 1, INT8)    // [0, 12]
 track_step = new(16, 1, INT32)  // in samples; divide by 2^16; updated with freq
 track_phase = new(16, 1, INT32) // in samples; divide by 2^16
+override_instr = -1
 clean(track_freq)
 
 SMP_LEN = 256 * 65536
@@ -55,7 +56,7 @@ SMP_LEN = 256 * 65536
 fn note_on($tid, $freq, $vol, $pan) {
     if (track_freq[$tid] == 0) {
         // Reset phase at onset
-        track_phase = 0
+        track_phase[$tid] = 0
     }
     if ($freq != -1) {
         track_freq[$tid] = $freq
@@ -65,7 +66,14 @@ fn note_on($tid, $freq, $vol, $pan) {
     if ($pan != -1) { track_pan[$tid] = $pan }
 }
 
-note_on(0, 440, 0x40, 8)
+fn note_on_tmp($tid, $instr) {
+    override_instr = $instr
+    track_phase[$tid] = 0
+    track_freq[$tid] = 440
+    track_step[$tid] = round(SMP_LEN / 22050 * 440)
+    track_vol[$tid] = 0x80
+    track_pan[$tid] = 6
+}
 
 fn note_off($tid) {
     track_freq[$tid] = 0
@@ -98,10 +106,13 @@ fn audio_callback($stream, $userdata, $channels, $frames,
         $pan = track_pan[$i]
         $delta = track_step[$i]
 
+        $instr = override_instr
+        if (override_instr == -1) { $instr = instruments[$i] }
+
         smpconf[SMP_DEST] = aud_buf2
         smpconf[SMP_DEST_OFF] = 0
         smpconf[SMP_DEST_LEN] = $frames
-        smpconf[SMP_SRC] = osctab[0]
+        smpconf[SMP_SRC] = osctab[$instr]
         smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
         smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
         smpconf[SMP_SRC_SIZE] = 0

@@ -186,6 +186,7 @@ fn options_init() {
     $i = 0
     while ($i < 42) {
         drum_btn[$i] = add_btn(0, 0, 0, 0, drum_names[$i], 0, nord6, 0, wave_callback)
+        wave_btn[$i].bank = 2
         drum_btn[$i].idx = $i
         drum_btn[$i].pos = drum_names[$i].pos
         $i + 1
@@ -195,6 +196,7 @@ fn options_init() {
     while ($i < 100) {
         sprintf($s, "Wave %02d", $i)
         wave_btn[$i] = add_btn(0, 0, 0, 0, clone($s), 0, nord6, 0, wave_callback)
+        wave_btn[$i].bank = 1
         wave_btn[$i].idx = $i
         $i + 1
     }
@@ -400,8 +402,13 @@ fn opt_mouse_down($x, $y) {
         opt_tempo_down = 1
         opt_mouse_move($x, $y)
     }
+
+    if (btn_sel_id.bank == 1) {
+        note_on_tmp(0, btn_sel_id.idx)
+    }
 }
 
 fn opt_mouse_up($x, $y) {
     opt_tempo_down = 0
+    note_off(0)
 }
