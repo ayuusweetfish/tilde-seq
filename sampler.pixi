@@ -7,8 +7,12 @@ if (get_xsize(oscdata) != 25600) { halt }
 
 $i = 0
 while ($i < 100) {
-    osctab[$i] = new(256, 1, INT8)
-    copy(osctab[$i], oscdata, 0, 256 * $i, 256)
+    osctab[$i] = new(256, 1, INT16)
+    $j = 0
+    while ($j < 256) {
+        osctab[$i][$j] = oscdata[256 * $i + $j] * 256
+        $j + 1
+    }
     $i + 1
 }
 
@@ -77,10 +81,10 @@ fn audio_callback($stream, $userdata, $channels, $frames,
     $output_time_in_system_ticks, $in_channels, $latency_in_frames)
 {
     if (aud_buf0 == -1) {
-        aud_buf0 = new($frames, 1, INT8)
-        aud_buf1 = new($frames, 1, INT8)
-        aud_buf2 = new($frames, 1, INT8)
-        aud_buf3 = new($frames, 1, INT8)
+        aud_buf0 = new($frames, 1, INT16)
+        aud_buf1 = new($frames, 1, INT16)
+        aud_buf2 = new($frames, 1, INT16)
+        aud_buf3 = new($frames, 1, INT16)
     }
 
     clean(aud_buf0)
@@ -127,4 +131,4 @@ fn audio_callback($stream, $userdata, $channels, $frames,
     ret(1)
 }
 
-set_audio_callback(audio_callback, 0, 22050, INT8, 2, AUDIO_FLAG_INTERP2)
+set_audio_callback(audio_callback, 0, 22050, INT16, 2, AUDIO_FLAG_INTERP2)
