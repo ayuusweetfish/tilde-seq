@@ -149,6 +149,14 @@ menu_btns_text[5].cb = roll_cut
 menu_btns_text[6].cb = roll_copy
 menu_btns_text[7].cb = roll_clearsel
 menu_btns_text[8].cb = roll_paste
+menu_btns_text[9].cb = {
+    roll_toggle_play()
+    if (roll_playing) {
+        menu_btns[9].text = "Stop"
+    } else {
+        menu_btns[9].text = "Play"
+    }
+}
 menu_btns_text[10].cb = {
     in_options ^ 1
     if (in_options) {
@@ -276,6 +284,7 @@ while (running) {
         if (EVT[EVT_TYPE] == EVT_BUTTONDOWN) {
             if (EVT[EVT_FLAGS] & EVT_FLAG_CTRL) { roll_ctrl = 1 }
             if (EVT[EVT_FLAGS] & EVT_FLAG_SHIFT) { roll_shift = 1 }
+            // Check for track switch
             $t = -1
             if (EVT[EVT_KEY] >= '1' && EVT[EVT_KEY] <= '8') {
                 $t = EVT[EVT_KEY] - '1'
@@ -293,6 +302,11 @@ while (running) {
                 last_track_btn = $t
                 switch_track($t)
                 update_track_btns()
+            }
+            // Space bar: play/stop
+            if (EVT[EVT_KEY] == ' ') {
+                menu_btns_text[9].cb()
+                changed = 1
             }
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {

@@ -162,3 +162,7 @@ fn audio_callback($stream, $userdata, $channels, $frames,
 }
 
 set_audio_callback(audio_callback, 0, 22050, INT16, 2, AUDIO_FLAG_INTERP2)
+
+fn sampler_get_position() {
+    ret(floor(get_timer(0) / tick_len))
+}

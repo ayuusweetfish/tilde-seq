@@ -170,10 +170,32 @@ fn roll_mouse_move($x, $y) {
     roll_changed = 1
 }
 
+roll_playing = 0
+
 fn roll_tick($dt) {
     if (roll_hscroll != 0) {
         roll_px + (roll_hscroll * $dt / 4)
         roll_changed = 1
+    }
+    if (roll_playing) {
+        $t = sampler_get_position()
+        if (roll_sside != $t) {
+            roll_sside = $t
+            roll_sfin = roll_sside
+            roll_changed = 1
+        }
+    }
+}
+
+fn roll_toggle_play() {
+    if (roll_playing) {
+        // Stop
+        roll_playing = 0
+    } else {
+        // Start
+        sort_sel_endpts()
+        roll_sfin = roll_sside
+        roll_playing = 1
     }
 }
 
