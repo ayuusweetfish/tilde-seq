@@ -25,21 +25,28 @@ while ($i < 42) {
         $real[$len - 1] = '\0'
     }
     sprintf($path, "Wave/%s.wav", $real)
-    drumtab[$i] = load($path)
+    $drumdata = load($path)
+    $j = 0
+    $n = get_xsize($drumdata)
+    drumtab[$i] = new($n, 1, INT16)
+    while ($j < $n) {
+        drumtab[$i][$j] = $drumdata[$j] * 256
+        $j + 1
+    }
     $i + 1
 }
 remove($path)
 
 // TODO: Implement cubic interpolation (tabread4~)
 fn osc_sample($instr, $phase) {
-    ret(osctab[$instr][floor($phase * 256)])
+    ret(osctab[$instr][floor($phase * 256)] div 256)
 }
 
 fn drum_sample($instr, $time) {
 }
 
 fn drum_sample_phase($instr, $phase) {
-    ret(drumtab[$instr][floor($phase * get_xsize(drumtab[$instr]))])
+    ret(drumtab[$instr][floor($phase * get_xsize(drumtab[$instr]))] div 256)
 }
 
 track_freq = new(16, 1, INT16)  // in Hz; 0 means note off

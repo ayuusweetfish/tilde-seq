@@ -354,12 +354,16 @@ fn draw_options() {
         $b[$i].h = $ys[$r + 1] - $ys[$r] - 2
         $b[$i].bg = nord4
         $b[$i].alphas = 0x2040
-        // TODO: Draw drum samples
-        $j = 0
+        // Oscillograph preview
+        $j = 1
         while ($j < $b[$i].w) {
             $phase = $j / $b[$i].w
             $smp_y = (127 - $sampler($i, $phase)) / 256   // [0, 1)
-            dot($b[$i].x + $j, $b[$i].y + floor($smp_y * $b[$i].h), nord7)
+            $smp_last = (127 - $sampler($i, ($j - 1) / $b[$i].w)) / 256
+            line(
+                $b[$i].x + $j - 1, $b[$i].y + floor($smp_last * $b[$i].h),
+                $b[$i].x + $j, $b[$i].y + floor($smp_y * $b[$i].h),
+                nord7)
             $j + 1
         }
         $i + 1
