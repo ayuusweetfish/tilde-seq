@@ -186,7 +186,7 @@ fn options_init() {
     $i = 0
     while ($i < 42) {
         drum_btn[$i] = add_btn(0, 0, 0, 0, drum_names[$i], 0, nord6, 0, wave_callback)
-        wave_btn[$i].bank = 2
+        drum_btn[$i].bank = 2
         drum_btn[$i].idx = $i
         drum_btn[$i].pos = drum_names[$i].pos
         $i + 1
@@ -410,9 +410,13 @@ fn opt_mouse_down($x, $y) {
     if (btn_sel_id.bank == 1) {
         note_on_tmp(0, btn_sel_id.idx)
     }
+    if (btn_sel_id.bank == 2) {
+        note_on_tmp(8, btn_sel_id.idx)
+    }
 }
 
 fn opt_mouse_up($x, $y) {
     opt_tempo_down = 0
     note_off(0)
+    note_off(15)
 }
