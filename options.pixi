@@ -408,11 +408,8 @@ fn opt_mouse_down($x, $y) {
         opt_mouse_move($x, $y)
     }
 
-    if (btn_sel_id.bank == 1) {
-        note_preview_instr(16, btn_sel_id.idx)
-    }
-    if (btn_sel_id.bank == 2) {
-        note_preview_instr(17, btn_sel_id.idx)
+    if (btn_sel_id && btn_sel_id.bank != 0) {
+        note_preview_instr(15 + btn_sel_id.bank, btn_sel_id.idx)
     }
 }
 
