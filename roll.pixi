@@ -4,7 +4,7 @@
 
 CELL_HEIGHT = 8
 CELL_WIDTH = 13
-MAX_TICKS = 990
+MAX_TICKS = 0xffff
 
 NOCHANGE = 0xff
 HIGHEST_NOTE = 95
@@ -354,7 +354,7 @@ roll_bar = 16
 roll_beat = 4
 roll_tracks = new(16, 1, INT)
 
-HISTORY = 32
+HISTORY = 8
 roll_history = new(HISTORY, 1, INT)
 roll_hist_top = 0
 roll_hist_ptr = 0
@@ -447,14 +447,23 @@ fn roll_clear() {
 fn add_note($tid, $x, $y, $len, $vol, $pan) {
     roll_remove_dup_attr($tid, $x)
 
+    $l = roll_tracks[$tid]
+    if ($l.cnt == get_x_size($l)) {
+        send_notif("Too many notes on the track")
+        ret(-1)
+    }
+
     $n = new()
+    if ($n == -1) {
+        send_notif("Insufficient memory... Try restarting the program", nord0)
+        ret($n)
+    }
     $n.x = $x
     $n.y = $y
     $n.len = $len
     $n.vol = $vol
     $n.pan = $pan
 
-    $l = roll_tracks[$tid]
     $l[$l.cnt] = $n
     $l.cnt + 1
     ret($n)
@@ -778,13 +787,25 @@ fn duplicate_track($l) {
     ret($ret)
 }
 
+fn release_track($l) {
+    if ($l.ref == 1) {
+        $cnt = $l.cnt
+        $i = 0
+        while ($i < $cnt) {
+            release($l[$i])
+            $i + 1
+        }
+    }
+    release($l)
+}
+
 fn roll_push_history() {
     if (roll_no_history) { ret }
     if (roll_hist_ptr == HISTORY - 1) {
         // Release the oldest record
         $i = 0
         while ($i < 16) {
-            release(roll_history[0][$i])
+            release_track(roll_history[0][$i])
             $i + 1
         }
         // Shift out
@@ -801,7 +822,7 @@ fn roll_push_history() {
         while ($j <= roll_hist_top) {
             $i = 0
             while ($i < 16) {
-                release(roll_history[$j][$i])
+                release_track(roll_history[$j][$i])
                 $i + 1
             }
             $j + 1
@@ -853,7 +874,7 @@ fn roll_clear_history() {
     while ($j <= roll_hist_top) {
         $i = 0
         while ($i < 16) {
-            release(roll_history[$j][$i])
+            release_track(roll_history[$j][$i])
             $i + 1
         }
         $j + 1
