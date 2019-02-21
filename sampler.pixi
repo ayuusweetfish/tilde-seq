@@ -82,7 +82,11 @@ fn note_on($tid, $note, $vol, $pan) {
 
 fn note_preview_instr($tid, $instr) {
     instruments[$tid] = $instr
-    note_on($tid, 45, 0x80, 6)
+    if ($tid < 8 || $tid == 16) {
+        note_on($tid, 45, 0x80, 6)
+    } else {
+        note_on($tid, 27, 0x80, 6)
+    }
 }
 
 fn note_off($tid) {
