@@ -64,7 +64,7 @@ fn note_on($tid, $note, $vol, $pan) {
         if ($tid < 8 || $tid == 16) {
             // Note 45 plays at 440 Hz
             // Thus the magic number is log_2(440) - 45/12 = 5.03136
-            $freq = pow(2, ($note + tunings[$tid] / 1000) / 12 + 5.03136)
+            $freq = pow(2, ($note + tunings[$tid] / 1000 - 1) / 12 + 5.03136)
             $step = 256 / 44100 * $freq
         } else {
             // note / 27 / (44100 / 22050)
