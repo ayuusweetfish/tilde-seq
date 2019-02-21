@@ -605,6 +605,7 @@ fn roll_break($x) {
 fn roll_cut() {
     roll_copy(0)
     roll_shrink()
+    roll_sfin = roll_sside
 }
 
 fn sort_sel_endpts() {
@@ -703,6 +704,7 @@ fn roll_paste() {
     }
 
     roll_push_history()
+    roll_sfin = roll_sside + roll_clip_len - 1
 }
 
 fn roll_shrink() {
