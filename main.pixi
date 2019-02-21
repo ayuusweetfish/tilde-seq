@@ -47,7 +47,8 @@ notif_time = 0
 NOTIF_DUR = 5000
 
 fn send_notif($msg, $colour) {
-    notif_msg = $msg
+    if (notif_msg != 0) { remove(notif_msg) }
+    notif_msg = clone($msg)
     notif_colour = $colour
     notif_time = get_timer(0)
     changed = 1
@@ -359,6 +360,7 @@ while (running) {
     try_autosave(0)
 
     if (notif_msg != 0 && $t >= notif_time + NOTIF_DUR) {
+        remove(notif_msg)
         notif_msg = 0
         changed = 1
     }

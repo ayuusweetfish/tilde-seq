@@ -176,6 +176,8 @@ fn save_file($path) {
     fclose($f)
 }
 
+current_path = -1
+
 fn menu_new_file() {
     roll_clear()
     roll_init_history()
@@ -186,17 +188,40 @@ fn menu_new_file() {
     tick_len = 100
     reset_instruments()
 
+    if (current_path != -1) {
+        remove(current_path)
+        current_path = -1
+    }
+
     send_notif("All reset", nord15)
 }
 
+fn display_file_notif($prompt) {
+    $s = new(1, 1, INT8)
+    clean($s)
+    strcat($s, $prompt)
+    $path = current_path
+    $i = strlen($path) - 1
+    while ($i >= 0 && $path[$i] != '/' && $path[$i] != '\\') { $i - 1 }
+    strcat($s, strlen($s), $path, $i + 1)
+    send_notif($s, nord14)
+    remove($s)
+}
+
 fn menu_open_file() {
-    $path = file_dialog("Open", "org", "file_dialog_state")
+    if (current_path != -1 && roll_shift) {
+        $path = current_path
+        $msg = "Reloaded: "
+    } else {
+        $path = file_dialog("Open", "org", "tilde_fdialogstate")
+        $msg = "Loaded: "
+    }
     if ($path != -1) {
         $result = load_file($path)
-        remove($path)
+        current_path = $path
         if ($result.succeeded) {
             popularize_editor($result)
-            send_notif("File opened", nord14)
+            display_file_notif($msg)
         } else {
             send_notif($result, nord11)
         }
@@ -204,25 +229,30 @@ fn menu_open_file() {
 }
 
 fn menu_save_file() {
-    $path = file_dialog("Open", "org", "file_dialog_state")
+    $path = current_path
+    if ($path == -1 || roll_shift) {
+        $title = "Save As"
+        if ($path == -1) { $title = "Save" }
+        $path = file_dialog($title, "org", "tilde_fdialogstate")
+    }
     if ($path != -1) {
         save_file($path)
-        remove($path)
-        send_notif("File saved", nord14)
+        current_path = $path
+        display_file_notif("Saved: ")
     }
 }
 
 last_save = 0
 
 fn boot_workspace() {
-    $result = load_file("2:/workspace.org")
+    $result = load_file("2:/tilde_workspace.org")
     if ($result.succeeded) {
         // Load the saved workspace
         popularize_editor($result)
-        send_notif("Welcome back!", nord12)
+        send_notif("Welcome back ^ ^", nord12)
     } else {
         // Most probably first-time bootup
-        send_notif("Nice to meet you!", nord12)
+        send_notif("This is tilde-seq. Nice to meet you!", nord12)
     }
 }
 
@@ -230,7 +260,7 @@ fn try_autosave($forced) {
     $t = get_timer(0)
     // Save every minute
     if ($forced || last_save < $t - 60000) {
-        save_file("2:/workspace.org")
+        save_file("2:/tilde_workspace.org")
         last_save = $t
         send_notif("Workspace autosaved", nord14)
         ret(1)
