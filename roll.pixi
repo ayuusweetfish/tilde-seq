@@ -239,13 +239,19 @@ roll_start_play_px = -1
 roll_start_play_py = -1
 roll_start_play_tick = 0
 roll_play_last_tick = -1
+roll_start_play_sel = -1
+roll_start_play_tid = -1
 
 fn roll_toggle_play() {
     if (roll_playing) {
         // Stop
         roll_playing = 0
         all_silence()
-        // Restore selection and view position
+        // Restore track & range selection and view position
+        if (roll_start_play_sel != -1) {
+            roll_track_sel = roll_start_play_sel
+            roll_tid = roll_start_play_tid
+        }
         roll_sside = roll_start_play_tick
         roll_sfin = roll_sside
         roll_px = roll_start_play_px
@@ -254,6 +260,16 @@ fn roll_toggle_play() {
         // Save current view position
         roll_start_play_px = roll_px
         roll_start_play_py = roll_py
+        if (roll_ctrl || roll_shift) {
+            // Save current track selection
+            roll_start_play_sel = roll_track_sel
+            roll_start_play_tid = roll_tid
+            roll_track_sel = (1 << 16) - 1
+            roll_tid = 1
+        } else {
+            roll_start_play_sel = -1
+            roll_start_play_tid = -1
+        }
         // Move to selection start
         sort_sel_endpts()
         // Start
@@ -262,6 +278,7 @@ fn roll_toggle_play() {
         roll_play_last_tick = -1
         start_timer(1)
     }
+    update_track_btns()
 }
 
 fn roll_mouse_up($x, $y) {
@@ -387,6 +404,10 @@ roll_tid = 0
 fn switch_track($t) {
     if (roll_ctrl) {
         if ((roll_track_sel ^ (1 << $t)) != 0) {
+            if (roll_track_sel & (1 << $t)) {
+                // Turn off sustaining notes, if any
+                note_off($t)
+            }
             roll_track_sel ^ (1 << $t)
         }
         // Take lowest bit
