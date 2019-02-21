@@ -965,7 +965,7 @@ fn draw_track_attr($t, $x_sta, $x_fin, $y_sta, $y_fin) {
     $i = 0
     $col = get_blend(track_colours[$t], WHITE, 96)
 
-    transp(192)
+    if (roll_playing) { transp(48) } else { transp(192) }
     while ($i < $cnt) {
         $n = $l[$i]
 
@@ -1098,7 +1098,7 @@ fn draw_roll() {
     }
 
     // Pan area
-    transp(224)
+    if (roll_playing) { transp(56) } else { transp(224) }
     fbox(roll_x, roll_y + roll_h - roll_vol_h - roll_pan_h,
         roll_w, roll_pan_h, get_blend(nord9, BLACK, 64))
     print("L", roll_x + 1,
