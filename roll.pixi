@@ -418,6 +418,11 @@ fn switch_track($t) {
             $t + 1
         }
     } else {
+        $i = 0
+        while ($i < 16) {
+            if ($i != $t) { note_off($i) }
+            $i + 1
+        }
         roll_track_sel = (1 << $t)
     }
     roll_tid = $t
