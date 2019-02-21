@@ -249,7 +249,9 @@ fn roll_toggle_play() {
         // Stop
         roll_playing = 0
         all_silence()
-        // Restore view position
+        // Restore selection and view position
+        roll_sside = roll_start_play_tick
+        roll_sfin = roll_sside
         roll_px = roll_start_play_px
         roll_py = roll_start_play_py
     } else {
@@ -986,9 +988,10 @@ fn draw_roll() {
     transp(128)
     fbox(roll_x, roll_y, roll_w, roll_sel_h, nord4)
 
-    sort_sel_endpts()
+    // Do not call sort_sel_endpts() as it interferes with current selection
     $x1 = roll_sside
     $x2 = roll_sfin
+    if ($x1 > $x2) { $t = $x1 $x1 = $x2 $x2 = $t }
 
     transp(255)
     fbox(roll_x + $x1 * CELL_WIDTH - roll_px, roll_y,
