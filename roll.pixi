@@ -265,7 +265,6 @@ fn roll_toggle_play() {
             roll_start_play_sel = roll_track_sel
             roll_start_play_tid = roll_tid
             roll_track_sel = (1 << 16) - 1
-            roll_tid = 1
         } else {
             roll_start_play_sel = -1
             roll_start_play_tid = -1
