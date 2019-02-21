@@ -1,7 +1,6 @@
 osctab = new(100, 1, INT)
 drumtab = new(42, 1, INT)
 
-// Raw PCM, 22050 Hz, signed 8-bit, mono
 oscdata = load("Wave/Wave.dat")
 if (get_xsize(oscdata) != 25600) { halt }
 
@@ -16,6 +15,7 @@ while ($i < 100) {
     $i + 1
 }
 
+// Raw PCM, 22050 Hz, signed 8-bit, mono
 $path = ""
 $i = 0
 while ($i < 42) {
@@ -65,7 +65,7 @@ fn note_on($tid, $freq, $vol, $pan) {
     }
     if ($freq != -1) {
         track_freq[$tid] = $freq
-        track_step[$tid] = round(SMP_LEN / 22050 * $freq)
+        track_step[$tid] = round(SMP_LEN / 44100 * $freq)
     }
     if ($vol != -1) { track_vol[$tid] = $vol }
     if ($pan != -1) { track_pan[$tid] = $pan }
@@ -161,7 +161,7 @@ fn audio_callback($stream, $userdata, $channels, $frames,
     ret(1)
 }
 
-set_audio_callback(audio_callback, 0, 22050, INT16, 2, AUDIO_FLAG_INTERP2)
+set_audio_callback(audio_callback, 0, 44100, INT16, 2, 0)
 
 fn sampler_get_position() {
     ret(floor(get_timer(0) / tick_len))
