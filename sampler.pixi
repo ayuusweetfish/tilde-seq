@@ -48,7 +48,7 @@ fn drum_sample_phase($instr, $phase) {
 
 // Tracks 16 and 17 are for preview
 track_freq = new(18, 1, INT16)  // in Hz; 0 means note off
-track_vol = new(18, 1, INT8)    // [0, 255]
+track_vol = new(18, 1, INT16)   // [0, 255]; INT8 introduces complexity
 track_pan = new(18, 1, INT8)    // [0, 12]
 track_step = new(18, 1, INT32)  // in samples; divide by 2^16; updated with freq
 track_phase = new(18, 1, INT32) // in samples; divide by 2^16
@@ -78,6 +78,10 @@ fn note_preview_instr($tid, $instr) {
 
 fn note_off($tid) {
     track_freq[$tid] = 0
+}
+
+fn all_silence() {
+    clean(track_freq)
 }
 
 aud_buf0 = -1
@@ -128,7 +132,7 @@ fn audio_callback($stream, $userdata, $channels, $frames,
         }
         smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
         smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
-        smpconf[SMP_VOL1] = round($vol * 256 * (12 - $pan) / 12)
+        smpconf[SMP_VOL1] = round($vol * 128 * (12 - $pan) / 12)
         smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
         smpconf[SMP_DELTA] = $delta
         sampler(smpconf)
@@ -137,7 +141,7 @@ fn audio_callback($stream, $userdata, $channels, $frames,
         smpconf[SMP_DEST] = aud_buf3
         smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
         smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
-        smpconf[SMP_VOL1] = round($vol * 256 * $pan / 12)
+        smpconf[SMP_VOL1] = round($vol * 128 * $pan / 12)
         smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
         sampler(smpconf)
         op_cc(OP_SADD, aud_buf1, aud_buf3)

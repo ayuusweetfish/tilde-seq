@@ -112,6 +112,8 @@ fn roll_mouse_move($x, $y) {
     if (roll_moving) {
         roll_px = roll_mx - $x
         roll_py = roll_my + $y
+        roll_start_play_px = roll_px
+        roll_start_play_py = roll_py
     }
     if (roll_erasing) {
         $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
@@ -178,24 +180,84 @@ fn roll_tick($dt) {
         roll_changed = 1
     }
     if (roll_playing) {
-        $t = sampler_get_position()
-        if (roll_sside != $t) {
-            roll_sside = $t
-            roll_sfin = roll_sside
+        $t = get_timer(1) div tick_len
+        if (roll_play_last_tick < $t) {
+            roll_play_last_tick = $t
+            if (roll_start_play_tick + $t >= MAX_TICKS) {
+                // Stop playing if the end is reached
+                roll_toggle_play()
+            } else {
+                // Update playback
+                exec_events(roll_start_play_tick + $t)
+                // Update view
+                roll_sside = roll_start_play_tick + $t
+                roll_sfin = roll_sside
+            }
             roll_changed = 1
         }
     }
 }
 
+fn exec_events($x) {
+    $j = 0
+    while ($j < 16) {
+        if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
+
+        $l = roll_tracks[$j]
+        $cnt = $l.cnt
+        $i = 0
+        while ($i < $cnt) {
+            $n = $l[$i]
+            // Note off placed before note on
+            // as there may be attributive notes (0-length)
+            // and consecutive notes
+            if ($n.y != NOCHANGE && $n.x + $n.len == $x) {
+                note_off($j)
+            }
+            if ($n.x == $x) {
+                $freq = -1
+                $vol = -1
+                $pan = -1
+                if ($n.y != NOCHANGE) {
+                    // Note 45 plays at 440 Hz
+                    // Thus the magic number is log_2(440) - 45/12 = 5.03136
+                    $freq = pow(2, ($n.y + tunings[$j] / 1000) / 12 + 5.03136)
+                }
+                if ($n.vol != NOCHANGE) { $vol = $n.vol }
+                if ($n.pan != NOCHANGE) { $pan = $n.pan }
+                note_on($j, $freq, $vol, $pan)
+            }
+            $i + 1
+        }
+
+        $j + 1
+    }
+}
+
+roll_start_play_px = -1
+roll_start_play_py = -1
+roll_start_play_tick = 0
+roll_play_last_tick = -1
+
 fn roll_toggle_play() {
     if (roll_playing) {
         // Stop
         roll_playing = 0
+        all_silence()
+        // Restore view position
+        roll_px = roll_start_play_px
+        roll_py = roll_start_play_py
     } else {
-        // Start
+        // Save current view position
+        roll_start_play_px = roll_px
+        roll_start_play_py = roll_py
+        // Move to selection start
         sort_sel_endpts()
-        roll_sfin = roll_sside
+        // Start
         roll_playing = 1
+        roll_start_play_tick = roll_sside
+        roll_play_last_tick = -1
+        start_timer(1)
     }
 }
 
