@@ -189,9 +189,14 @@ fn roll_tick($dt) {
             } else {
                 // Update playback
                 exec_events(roll_start_play_tick + $t)
-                // Update view
+                // Update position display
                 roll_sside = roll_start_play_tick + $t
                 roll_sfin = roll_sside
+                // Auto-scroll
+                $bar_start = (roll_sside - roll_sside % roll_bar) * CELL_WIDTH
+                if ($bar_start + roll_bar * CELL_WIDTH >= roll_px + roll_w) {
+                    roll_px = $bar_start
+                }
             }
             roll_changed = 1
         }
