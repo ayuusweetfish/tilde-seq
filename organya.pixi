@@ -127,8 +127,8 @@ fn save_file($path) {
     put_uint16($f, tick_len)
     put_uint8($f, roll_bar div roll_beat)
     put_uint8($f, roll_beat)
-    put_uint32($f, 0)
-    put_uint32($f, 0xffffffff)
+    put_uint32($f, roll_rpt_a)
+    put_uint32($f, roll_rpt_b + 1)
 
     $i = 0
     while ($i < 16) {
@@ -275,6 +275,9 @@ fn popularize_editor($org) {
 
     roll_bar = $org.line * $org.dot
     roll_beat = $org.dot
+
+    roll_rpt_a = $org.rpt_a
+    roll_rpt_b = $org.rpt_b - 1
 
     $i = 0
     while ($i < 16) {
