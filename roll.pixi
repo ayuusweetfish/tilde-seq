@@ -223,11 +223,7 @@ fn exec_events($x) {
                 $freq = -1
                 $vol = -1
                 $pan = -1
-                if ($n.y != NOCHANGE) {
-                    // Note 45 plays at 440 Hz
-                    // Thus the magic number is log_2(440) - 45/12 = 5.03136
-                    $freq = pow(2, ($n.y + tunings[$j] / 1000) / 12 + 5.03136)
-                }
+                if ($n.y != NOCHANGE) { $freq = $n.y }
                 if ($n.vol != NOCHANGE) { $vol = $n.vol }
                 if ($n.pan != NOCHANGE) { $pan = $n.pan }
                 note_on($j, $freq, $vol, $pan)
