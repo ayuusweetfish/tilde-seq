@@ -185,7 +185,7 @@ fn roll_tick($dt) {
             roll_play_last_tick = $t
             if (roll_start_play_tick + $t >= MAX_TICKS) {
                 // Stop playing if the end is reached
-                menu_btns_text[9].cb()
+                menu_btns_text[8].cb()
             } else {
                 // Update playback
                 exec_events(roll_start_play_tick + $t)

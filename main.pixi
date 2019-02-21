@@ -121,11 +121,10 @@ menu_btns_text[3] = "Undo"
 menu_btns_text[4] = "Redo"
 menu_btns_text[5] = "Cut"
 menu_btns_text[6] = "Copy"
-menu_btns_text[7] = "Clear"
-menu_btns_text[8] = "Paste"
-menu_btns_text[9] = "Play"
-menu_btns_text[10] = "Options"
-menu_btns_text[11] = "Config"
+menu_btns_text[7] = "Paste"
+menu_btns_text[8] = "Play"
+menu_btns_text[9] = "Options"
+menu_btns_text[10] = "Config"
 
 menu_btns_bg[0] = nord10
 menu_btns_bg[1] = nord10
@@ -135,46 +134,46 @@ menu_btns_bg[4] = nord9
 menu_btns_bg[5] = nord7
 menu_btns_bg[6] = nord7
 menu_btns_bg[7] = nord7
-menu_btns_bg[8] = nord7
+menu_btns_bg[8] = nord8
 menu_btns_bg[9] = nord8
 menu_btns_bg[10] = nord8
-menu_btns_bg[11] = nord8
 
 menu_btns_text[0].cb = menu_new_file
 menu_btns_text[1].cb = menu_open_file
 menu_btns_text[2].cb = menu_save_file
 menu_btns_text[3].cb = roll_undo
 menu_btns_text[4].cb = roll_redo
-menu_btns_text[5].cb = roll_cut
+menu_btns_text[5].cb = {
+    if (roll_shift) { roll_clearsel() } else { roll_cut() }
+}
 menu_btns_text[6].cb = roll_copy
-menu_btns_text[7].cb = roll_clearsel
-menu_btns_text[8].cb = roll_paste
-menu_btns_text[9].cb = {
+menu_btns_text[7].cb = roll_paste
+menu_btns_text[8].cb = {
     roll_toggle_play()
     if (roll_playing) {
-        menu_btns[9].text = "Stop"
+        menu_btns[8].text = "Stop"
     } else {
-        menu_btns[9].text = "Play"
+        menu_btns[8].text = "Play"
     }
 }
-menu_btns_text[10].cb = {
+menu_btns_text[9].cb = {
     in_options ^ 1
     if (in_options) {
-        menu_btns[10].text = "PnoRoll"
+        menu_btns[9].text = "PnoRoll"
         btns_cnt = all_btn_cnt
     } else {
-        menu_btns[10].text = "Options"
+        menu_btns[9].text = "Options"
         btns_cnt = normal_btn_cnt
     }
     update_track_btns()
     changed = 1
 }
-menu_btns_text[11].cb = {
+menu_btns_text[10].cb = {
     prefs_dialog()
 }
 
 $i = 0
-while ($i < 12) {
+while ($i < 11) {
     $w = get_text_xsize(menu_btns_text[$i]) + 12
     menu_btns[$i] =
         add_btn(0, 0, $w, 19, menu_btns_text[$i],
@@ -305,7 +304,7 @@ while (running) {
             }
             // Space bar: play/stop
             if (EVT[EVT_KEY] == ' ') {
-                menu_btns_text[9].cb()
+                menu_btns_text[8].cb()
                 changed = 1
             }
         }
