@@ -72,7 +72,6 @@ fn note_on($tid, $note, $vol, $pan) {
             // 44100 is the mixing sample frequency
             // and 22050 is the source format sample frequency
             $step = $note / 54
-            printf("%.4lf\n", $step)
         }
         track_step[$tid] = round($step * 65536)
     }

@@ -195,7 +195,7 @@ fn options_init() {
 
     $i = 0
     while ($i < 100) {
-        sprintf($s, "Wave %02d", $i)
+        sprintf($s, "%02d", $i)
         wave_btn[$i] = add_btn(0, 0, 0, 0, clone($s), 0, nord6, 0, wave_callback)
         wave_btn[$i].bank = 1
         wave_btn[$i].idx = $i
@@ -342,7 +342,7 @@ fn draw_options() {
     $xs = divide($btns_x, $btns_w, $columns)
     $ys = divide($btns_y, $btns_h, 10)
 
-    transp(192) // For sample dots
+    transp(128) // For oscillograph
     $i = 0
     while ($i < $instruments_cnt) {
         $idx = $i
