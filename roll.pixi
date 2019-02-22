@@ -45,6 +45,7 @@ roll_draw_pan = 0
 roll_draw_vol = 0
 
 roll_changed = 0
+file_unsaved = 0
 
 fn roll_mouse_down($x, $y, $is_right) {
     if ($x >= roll_x && $x < roll_x + roll_w &&
@@ -880,6 +881,7 @@ fn roll_push_history() {
 
     roll_hist_ptr + 1
     roll_hist_top = roll_hist_ptr
+    file_unsaved = 1
 }
 
 fn roll_undo() {

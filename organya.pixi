@@ -178,7 +178,18 @@ fn save_file($path) {
 
 current_path = -1
 
+fn ensure_saved() {
+    if (file_unsaved) {
+        file_unsaved = 0
+        send_notif("Changes not saved.\n\nClick menu again to discard and proceed", nord13)
+        ret(0)
+    } else {
+        ret(1)
+    }
+}
+
 fn menu_new_file() {
+    if (ensure_saved() == 0) { ret }
     roll_clear()
     roll_init_history()
 
@@ -213,6 +224,7 @@ fn menu_open_file() {
         $path = current_path
         $msg = "Reloaded: "
     } else {
+        if (ensure_saved() == 0) { ret }
         $path = file_dialog("Open", "org", "tilde_fdialogstate")
         $msg = "Loaded: "
     }
@@ -239,6 +251,7 @@ fn menu_save_file() {
         save_file($path)
         current_path = $path
         display_file_notif("Saved: ")
+        file_unsaved = 0
     }
 }
 

@@ -208,6 +208,7 @@ fn timesig_callback($sender) {
     tsigidx = $sender.idx
     roll_beat = timesigs[tsigidx] div 10
     roll_bar = timesigs[tsigidx] % 10 * roll_beat
+    file_unsaved = 1
 }
 
 fn clamp_tick_len() {
@@ -218,14 +219,17 @@ fn clamp_tick_len() {
 fn tempo_callback($sender) {
     tick_len + $sender.val
     clamp_tick_len()
+    file_unsaved = 1
 }
 
 fn tune_callback($sender) {
     tunings[roll_tid] = $sender.idx * 100 + 100
+    file_unsaved = 1
 }
 
 fn wave_callback($sender) {
     instruments[roll_tid] = $sender.idx
+    file_unsaved = 1
 }
 
 fn divide($x, $w, $n) {
@@ -394,6 +398,7 @@ fn opt_mouse_move($x, $y) {
     tick_len = round(2000 * ($x - $bar_x) / $bar_w)
     clamp_tick_len()
     changed = 1
+    file_unsaved = 1
 }
 
 fn opt_mouse_down($x, $y) {
