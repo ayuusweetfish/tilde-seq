@@ -262,7 +262,6 @@ fn try_autosave($forced) {
     if ($forced || last_save < $t - 60000) {
         save_file("2:/tilde_workspace.org")
         last_save = $t
-        send_notif("Workspace autosaved", nord14)
         ret(1)
     } else {
         ret(0)
