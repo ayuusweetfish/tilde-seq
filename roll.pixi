@@ -541,9 +541,9 @@ fn edit_attr($prop, $x, $val) {
 
     // No note matches, create a new one
     if ($prop[0] == 'v') {
-        add_note($tid, $x, NOCHANGE, 0, $val, NOCHANGE)
+        add_note($tid, $x, NOCHANGE, 1, $val, NOCHANGE)
     } else {
-        add_note($tid, $x, NOCHANGE, 0, NOCHANGE, $val)
+        add_note($tid, $x, NOCHANGE, 1, NOCHANGE, $val)
     }
 }
 
@@ -557,7 +557,7 @@ fn roll_monophonize($m) {
     $i = 0
     while ($i < $cnt) {
         $n = $l[$i]
-        if ($n != $m && $n.len != 0 &&
+        if ($n != $m && $n.y != NOCHANGE &&
             $n.x + $n.len > $m.x && $m.x + $m.len > $n.x)
         {
             if ($n.x < $m.x) {
