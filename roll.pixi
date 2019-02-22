@@ -81,6 +81,7 @@ fn roll_mouse_down($x, $y, $is_right) {
                     } else {
                         roll_mx = roll_editing.x - roll_mx
                     }
+                    note_on(roll_tid, roll_editing.y, roll_editing.vol, roll_editing.pan)
                 }
                 roll_changed = 1
             }
@@ -156,7 +157,10 @@ fn roll_mouse_move($x, $y) {
             roll_editing.x = $x1
             roll_editing.len = $x2 - $x1 + 1
         }
-        roll_editing.y = $my
+        if (roll_editing.y != NOCHANGE && roll_editing.y != $my) {
+            roll_editing.y = $my
+            note_on(roll_tid, roll_editing.y, roll_editing.vol, roll_editing.pan)
+        }
     }
     if (roll_draw_vol) {
         $mx = floor((roll_px + $x - roll_x) / CELL_WIDTH)
@@ -319,6 +323,7 @@ fn roll_mouse_up($x, $y) {
     roll_editing = -1
     roll_draw_pan = 0
     roll_draw_vol = 0
+    note_off(roll_tid)
 }
 
 fn roll_mouse_scrollup($x, $y) {
