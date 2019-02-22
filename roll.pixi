@@ -55,7 +55,7 @@ fn roll_mouse_down($x, $y, $is_right) {
         if ($y < roll_y + roll_sel_h) {
             roll_selecting = 1
             roll_changed = 1
-            if (roll_shift == 1) {
+            if (roll_shift != 0) {
                 roll_sside = roll_sfin
             }
             roll_sfin = floor((roll_px + $x - roll_x) / CELL_WIDTH)
@@ -331,7 +331,7 @@ fn roll_mouse_scrollup($x, $y) {
     if ($x >= roll_x && $x < roll_x + roll_w &&
         $y >= roll_y && $y < roll_y + roll_h)
     {
-        if (roll_ctrl == 1 && CELL_HEIGHT > 3) {
+        if (roll_ctrl != 0 && CELL_HEIGHT > 3) {
             roll_py = (roll_py - roll_h) / CELL_HEIGHT * (CELL_HEIGHT - 0.25) + roll_h
             CELL_HEIGHT - 0.25
             roll_changed = 1
@@ -349,7 +349,7 @@ fn roll_mouse_scrolldown($x, $y) {
     if ($x >= roll_x && $x < roll_x + roll_w &&
         $y >= roll_y && $y < roll_y + roll_h)
     {
-        if (roll_ctrl == 1 && CELL_HEIGHT < 8) {
+        if (roll_ctrl != 0 && CELL_HEIGHT < 8) {
             roll_py = (roll_py - roll_h) / CELL_HEIGHT * (CELL_HEIGHT + 0.25) + roll_h
             CELL_HEIGHT + 0.25
             roll_changed = 1
