@@ -127,6 +127,18 @@ menu_btns_text[8] = "Play"
 menu_btns_text[9] = "Options"
 menu_btns_text[10] = "Config"
 
+menu_btns_text[0].shortcut = 'n'
+menu_btns_text[1].shortcut = 'o'
+menu_btns_text[2].shortcut = 's'
+menu_btns_text[3].shortcut = 'z'
+menu_btns_text[4].shortcut = 0
+menu_btns_text[5].shortcut = 'x'
+menu_btns_text[6].shortcut = 'c'
+menu_btns_text[7].shortcut = 'v'
+menu_btns_text[8].shortcut = 0
+menu_btns_text[9].shortcut = 'p'
+menu_btns_text[10].shortcut = ','
+
 menu_btns_bg[0] = nord10
 menu_btns_bg[1] = nord10
 menu_btns_bg[2] = nord10
@@ -282,8 +294,8 @@ while (running) {
             running = 0
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONDOWN) {
-            if (EVT[EVT_FLAGS] & EVT_FLAG_CTRL) { roll_ctrl = 1 }
-            if (EVT[EVT_FLAGS] & EVT_FLAG_SHIFT) { roll_shift = 1 }
+            roll_ctrl = (EVT[EVT_FLAGS] & EVT_FLAG_CTRL)
+            roll_shift = (EVT[EVT_FLAGS] & EVT_FLAG_SHIFT)
             // Check for track switch
             $t = -1
             if (EVT[EVT_KEY] >= '1' && EVT[EVT_KEY] <= '8') {
@@ -307,6 +319,18 @@ while (running) {
             if (EVT[EVT_KEY] == ' ') {
                 menu_btns_text[8].cb()
                 changed = 1
+            }
+            // Other shortcuts
+            if (roll_ctrl) {
+                $i = 0
+                while ($i < 11) {
+                    if (EVT[EVT_KEY] == menu_btns_text[$i].shortcut) {
+                        menu_btns_text[$i].cb()
+                        changed = 1
+                        break
+                    }
+                    $i + 1
+                }
             }
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
