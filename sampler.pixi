@@ -25,6 +25,7 @@ while ($i < 42) {
         $real[$len - 1] = '\0'
     }
     sprintf($path, "Wave/%s.wav", $real)
+    remove($real)
     $drumdata = load($path)
     $j = 0
     $n = get_xsize($drumdata)
@@ -67,11 +68,11 @@ fn note_on($tid, $note, $vol, $pan) {
             $freq = pow(2, ($note + tunings[$tid] / 1000 - 1) / 12 + 5.03136)
             $step = 256 / 44100 * $freq
         } else {
-            // note / 27 / (44100 / 22050)
-            // where 27 is the note at which the sample is played at 1x speed
+            // note / 28 / (44100 / 22050)
+            // where 28 is the note at which the sample is played at 1x speed
             // 44100 is the mixing sample frequency
             // and 22050 is the source format sample frequency
-            $step = $note / 54
+            $step = $note / 56
         }
         track_step[$tid] = round($step * 65536)
     }
@@ -84,7 +85,7 @@ fn note_preview_instr($tid, $instr) {
     if ($tid < 8 || $tid == 16) {
         note_on($tid, 45, 0x80, 6)
     } else {
-        note_on($tid, 27, 0x80, 6)
+        note_on($tid, 28, 0x80, 6)
     }
 }
 
