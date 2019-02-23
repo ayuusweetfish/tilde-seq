@@ -496,7 +496,7 @@ fn add_note($tid, $x, $y, $len, $vol, $pan) {
     roll_remove_dup_attr($tid, $x)
 
     $l = roll_tracks[$tid]
-    if ($l.cnt == get_x_size($l)) {
+    if ($l.cnt == get_xsize($l)) {
         send_notif("Too many notes on the track")
         ret(-1)
     }
