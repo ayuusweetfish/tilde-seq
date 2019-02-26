@@ -112,7 +112,7 @@ smpconf[SMP_SRC_SIZE] = 0
 smpconf[SMP_LOOP] = 0
 smpconf[SMP_FLAGS] = SMP_FLAG_INTERP4
 
-fn lanczos_resmp($table, $x) {
+fn lanczos_resmp($table, $sz, $x) {
     $i = $x >> 16
     $x / 65536
     $A = 4
@@ -128,7 +128,9 @@ fn lanczos_resmp($table, $x) {
             $L = sin($y) * sin($y / $A) / ($y * $y / $A)
         } else { $L = 0 } }
         $den + $L
-        $r + $table[$j] * $L
+        if ($j >= 0 && $j < $sz) {
+            $r + $table[$j] * $L
+        }
         $j + 1
     }
     ret($r / $den)
@@ -171,7 +173,7 @@ fn audio_callback($stream, $userdata, $channels, $frames,
             $loop = 0   // No loop
         }
 
-        if ($delta >= 65536) {
+        if ($i < 8 || $i == 16 || $delta >= 65536) {
             smpconf[SMP_DEST] = aud_buf2
             smpconf[SMP_SRC] = $src
             smpconf[SMP_LOOP_LEN] = $loop
@@ -195,8 +197,9 @@ fn audio_callback($stream, $userdata, $channels, $frames,
             $rvol / 32768
             $offs = track_phase[$i]
             $p = 0
+            $sz = get_xsize($src)
             while ($p < $frames) {
-                $sample = lanczos_resmp($src, $offs)
+                $sample = lanczos_resmp($src, $sz, $offs)
                 aud_buf0[$p] + round($sample * $lvol)
                 aud_buf1[$p] + round($sample * $rvol)
                 $offs + $delta
