@@ -71,11 +71,11 @@ Range actions (cut, copy, paste) and playback only involve **selected tracks** (
 
   The best solution so far is... to just resist the desire to press Esc to exit there. Or maybe change the above line and compile your modified Pixilang.
 
-* The timbre sounds different from other programs
+* **(Fixed)** ~~The timbre sounds different from other programs~~
 
-  This is due to the interpolation algorithms employed. While most Organya implementations use bandlimited resampling algorithms ([e.g. nxengine-evo uses Lanczos resampling](https://github.com/nxengine/nxengine-evo/blob/master/src/sound/Organya.cpp#L230)), Pixilang has no built-in support for that and thus Tilde resorts to cubic spline interpolation, which introduces audible artefacts in the high end during upsampling. Hence, low percussion notes are especially prone to these artefacts (e.g. track _Gestation_ in the Cave Story OST sounds quite different).
+* Occasional clipping
 
-  It is currently a to-do to implement Lanczos resampling or [this](https://ccrma.stanford.edu/~jos/resample/) resampling algorithm, preferably still in Pixilang if no performance issues arise.
+  Maybe include a gentle compressor?
 
 ## Licence & acknowledgements
 
