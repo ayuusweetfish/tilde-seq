@@ -6,10 +6,11 @@ if (get_xsize(oscdata) != 25600) { halt }
 
 $i = 0
 while ($i < 100) {
-    osctab[$i] = new(256, 1, INT16)
+    osctab[$i] = new(512, 1, INT16)
     $j = 0
     while ($j < 256) {
         osctab[$i][$j] = oscdata[256 * $i + $j] * 256
+        osctab[$i][$j + 256] = osctab[$i][$j]
         $j + 1
     }
     $i + 1
@@ -111,6 +112,28 @@ smpconf[SMP_SRC_SIZE] = 0
 smpconf[SMP_LOOP] = 0
 smpconf[SMP_FLAGS] = SMP_FLAG_INTERP4
 
+fn lanczos_resmp($table, $x) {
+    $i = $x >> 16
+    $x / 65536
+    $A = 2
+    $r = 0
+    $j = $i - $A + 1
+    $den = 0
+    while ($j <= $i + $A) {
+        $y = $x - $j
+        if ($y >= -0.0001 && $y <= 0.0001) {
+            $L = 1
+        } else { if (abs($y) < $A) {
+            $y * M_PI
+            $L = $A * sin($y) * sin($y / $A) / ($y * $y / $A)
+        } else { $L = 0 } }
+        $den + $L
+        $r + $table[$j] * $L
+        $j + 1
+    }
+    ret($r)
+}
+
 fn audio_callback($stream, $userdata, $channels, $frames,
     $output_time_in_system_ticks, $in_channels, $latency_in_frames)
 {
@@ -137,29 +160,52 @@ fn audio_callback($stream, $userdata, $channels, $frames,
         $instr = override_instr
         if (override_instr == -1) { $instr = instruments[$i] }
 
-        smpconf[SMP_DEST] = aud_buf2
-        if ($i < 8 || $i == 16) {
-            smpconf[SMP_SRC] = osctab[$instr]
-            smpconf[SMP_LOOP_LEN] = 256 // Whole sample
-        } else {
-            smpconf[SMP_SRC] = drumtab[$instr]
-            smpconf[SMP_LOOP_LEN] = 0   // No loop
-        }
-        smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
-        smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
-        smpconf[SMP_VOL1] = round($vol * 128 * (12 - $pan) / 12)
-        smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
-        smpconf[SMP_DELTA] = $delta
-        sampler(smpconf)
-        op_cc(OP_SADD, aud_buf0, aud_buf2)
+        $lvol = round($vol * 128 * (12 - $pan) / 12)
+        $rvol = round($vol * 128 * $pan / 12)
 
-        smpconf[SMP_DEST] = aud_buf3
-        smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
-        smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
-        smpconf[SMP_VOL1] = round($vol * 128 * $pan / 12)
-        smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
-        sampler(smpconf)
-        op_cc(OP_SADD, aud_buf1, aud_buf3)
+        if ($i < 8 || $i == 16) {
+            $src = osctab[$instr]
+            $loop = 256 // Whole sample
+        } else {
+            $src = drumtab[$instr]
+            $loop = 0   // No loop
+        }
+
+        if ($delta >= 65536) {
+            smpconf[SMP_DEST] = aud_buf2
+            smpconf[SMP_SRC] = $src
+            smpconf[SMP_LOOP_LEN] = $loop
+            smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
+            smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
+            smpconf[SMP_VOL1] = $lvol
+            smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
+            smpconf[SMP_DELTA] = $delta
+            sampler(smpconf)
+            op_cc(OP_SADD, aud_buf0, aud_buf2)
+
+            smpconf[SMP_DEST] = aud_buf3
+            smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
+            smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
+            smpconf[SMP_VOL1] = $rvol
+            smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
+            sampler(smpconf)
+            op_cc(OP_SADD, aud_buf1, aud_buf3)
+        } else {
+            $lvol / 32768
+            $rvol / 32768
+            $offs = track_phase[$i]
+            $p = 0
+            while ($p < $frames) {
+                $sample = lanczos_resmp($src, $offs)
+                aud_buf0[$p] + round($sample * $lvol)
+                aud_buf1[$p] + round($sample * $rvol)
+                $offs + $delta
+                if ($loop != 0 && $offs >= $loop) {
+                    $offs - $loop
+                }
+                $p + 1
+            }
+        }
 
         if ($i < 8 || $i == 16) {
             $increment = $frames * $delta
