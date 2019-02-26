@@ -115,23 +115,23 @@ smpconf[SMP_FLAGS] = SMP_FLAG_INTERP4
 fn lanczos_resmp($table, $x) {
     $i = $x >> 16
     $x / 65536
-    $A = 2
+    $A = 4
     $r = 0
     $j = $i - $A + 1
     $den = 0
     while ($j <= $i + $A) {
         $y = $x - $j
-        if ($y >= -0.0001 && $y <= 0.0001) {
+        if ($y >= -0.00001 && $y <= 0.00001) {
             $L = 1
         } else { if (abs($y) < $A) {
             $y * M_PI
-            $L = $A * sin($y) * sin($y / $A) / ($y * $y / $A)
+            $L = sin($y) * sin($y / $A) / ($y * $y / $A)
         } else { $L = 0 } }
         $den + $L
         $r + $table[$j] * $L
         $j + 1
     }
-    ret($r)
+    ret($r / $den)
 }
 
 fn audio_callback($stream, $userdata, $channels, $frames,
