@@ -136,6 +136,8 @@ fn roll_mouse_move($x, $y) {
     }
     if (roll_selecting) {
         roll_sfin = floor((roll_px + $x - roll_x) / CELL_WIDTH)
+        if (roll_sfin < 0) { roll_sfin = 0 }
+        if (roll_sfin >= MAX_TICKS) { roll_sfin = MAX_TICKS - 1 }
         // Horizontal scroll
         roll_hscroll = 0
         if ($x <= roll_x) { roll_hscroll - 1.5 }
