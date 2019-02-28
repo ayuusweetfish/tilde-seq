@@ -199,6 +199,9 @@ fn menu_new_file() {
     tick_len = 100
     reset_instruments()
 
+    roll_last_vol = 0x80
+    roll_last_pan = 0x6
+
     if (current_path != -1) {
         remove(current_path)
         current_path = -1
