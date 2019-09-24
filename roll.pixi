@@ -194,6 +194,16 @@ fn roll_mouse_move($x, $y) {
 roll_playing = 0
 roll_play_pos = 0
 
+fn move_to_play_pos() {
+    $bar_start = (roll_sside - roll_sside % roll_bar) * CELL_WIDTH
+    if ($bar_start + roll_bar * CELL_WIDTH >= roll_px + roll_w ||
+        $bar_start < roll_px)
+    {
+        roll_px = $bar_start
+    }
+    roll_changed = 1
+}
+
 fn roll_tick($dt) {
     if (roll_hscroll != 0) {
         roll_px + (roll_hscroll * $dt / 4)
@@ -209,13 +219,7 @@ fn roll_tick($dt) {
             roll_sside = roll_play_pos
             roll_sfin = roll_sside
             // Auto-scroll
-            $bar_start = (roll_sside - roll_sside % roll_bar) * CELL_WIDTH
-            if ($bar_start + roll_bar * CELL_WIDTH >= roll_px + roll_w ||
-                $bar_start < roll_px)
-            {
-                roll_px = $bar_start
-            }
-            roll_changed = 1
+            move_to_play_pos()
         }
     }
 }
@@ -328,6 +332,8 @@ fn roll_toggle_play() {
         roll_start_play_tick = roll_sside
         roll_playback_tickfrac = 0
         start_playback_timer()
+        // Auto-scroll
+        move_to_play_pos()
     }
     update_track_btns()
 }
