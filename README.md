@@ -8,7 +8,7 @@ Tilde is entirely built in [Pixilang](http://warmplace.ru/soft/pixilang/) and ru
 
 * Download Pixilang.
 * Put `pixilang_config.ini` in the repository in the same folder as the Pixilang executable.
-* Run the Pixilang executable, select `main.pixi` and rock.
+* Run the Pixilang executable, select `boot.pixi` and rock.
 
 ## Controls
 
@@ -20,8 +20,10 @@ Range actions (cut, copy, paste) and playback only involve **selected tracks** (
 
 * Draw/drag to create/edit notes
 * **Ctrl**-drag to move around
-* Scroll to zoom horizontally
-* **Ctrl**-scroll to zoom vertically
+* Scroll to move horizontally
+* **Shift**-Scroll to move vertically
+* **Ctrl**-Scroll to zoom horizontally
+* **Ctrl**-**Shift**-scroll to zoom vertically
 * Drag in the selection area (white bar on the top) to select
 
 ### Keyboard shortcuts

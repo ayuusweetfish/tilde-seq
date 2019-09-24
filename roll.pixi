@@ -354,22 +354,44 @@ fn roll_mouse_up($x, $y) {
     if (roll_playing == 0) { note_off(roll_tid) }
 }
 
+fn roll_mouse_scroll($val) {
+    if (roll_ctrl == 0) {
+        if (roll_shift == 0) {
+            // Move horizontally
+            roll_px + ($val * 8 * roll_beat)
+        } else {
+            // Move vertically
+            roll_py - ($val * 13)
+        }
+        roll_changed = 1
+    } else {
+        if (roll_shift == 0) {
+            // Zoom horizontally
+            $new_width = CELL_WIDTH + $val * 0.25
+            if ($new_width >= 2 && $new_width <= 13) {
+                roll_px = roll_px / CELL_WIDTH * $new_width
+                CELL_WIDTH = $new_width
+                roll_changed = 1
+            }
+        } else {
+            // Zoom vertically
+            $new_height = CELL_HEIGHT + $val * 0.25
+            if ($new_height >= 3 && $new_height <= 8) {
+                $h = roll_h - roll_pan_h - roll_vol_h
+                roll_py = (roll_py - $h) / CELL_HEIGHT * $new_height + $h
+                CELL_HEIGHT = $new_height
+                roll_changed = 1
+            }
+        }
+    }
+    roll_clamp_p()
+}
+
 fn roll_mouse_scrollup($x, $y) {
     if ($x >= roll_x && $x < roll_x + roll_w &&
         $y >= roll_y && $y < roll_y + roll_h)
     {
-        if (roll_ctrl != 0 && CELL_HEIGHT > 3) {
-            $h = roll_h - roll_pan_h - roll_vol_h
-            roll_py = (roll_py - $h) / CELL_HEIGHT * (CELL_HEIGHT - 0.25) + $h
-            CELL_HEIGHT - 0.25
-            roll_changed = 1
-        }
-        if (roll_ctrl == 0 && CELL_WIDTH > 2) {
-            roll_px = roll_px / CELL_WIDTH * (CELL_WIDTH - 0.25)
-            CELL_WIDTH - 0.25
-            roll_changed = 1
-        }
-        roll_clamp_p()
+        roll_mouse_scroll(-1)
     }
 }
 
@@ -377,18 +399,7 @@ fn roll_mouse_scrolldown($x, $y) {
     if ($x >= roll_x && $x < roll_x + roll_w &&
         $y >= roll_y && $y < roll_y + roll_h)
     {
-        if (roll_ctrl != 0 && CELL_HEIGHT < 8) {
-            $h = roll_h - roll_pan_h - roll_vol_h
-            roll_py = (roll_py - $h) / CELL_HEIGHT * (CELL_HEIGHT + 0.25) + $h
-            CELL_HEIGHT + 0.25
-            roll_changed = 1
-        }
-        if (roll_ctrl == 0 && CELL_WIDTH < 13) {
-            roll_px = roll_px / CELL_WIDTH * (CELL_WIDTH + 0.25)
-            CELL_WIDTH + 0.25
-            roll_changed = 1
-        }
-        roll_clamp_p()
+        roll_mouse_scroll(1)
     }
 }
 
