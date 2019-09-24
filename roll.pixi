@@ -28,7 +28,7 @@ roll_activated = 0
 roll_moving = 0
 roll_mx = -1
 roll_my = -1
-roll_erasing = 0
+roll_erasing = 0    // 1 - yes, 2 - yes and already erased something
 roll_editing = -1
 roll_edit_idx = -1
 roll_eside = -1 // X coordinate of a fixed side for editing; -1 if moving
@@ -132,6 +132,7 @@ fn roll_mouse_move($x, $y) {
         if (roll_editing != -1) {
             remove_note(roll_tid, roll_edit_idx)
             roll_editing = -1
+            roll_erasing = 2
         }
     }
     if (roll_selecting) {
@@ -347,7 +348,7 @@ fn roll_mouse_up($x, $y) {
         roll_last_pan = roll_editing.pan
         roll_changed = 1
     }
-    if (roll_editing != -1 || roll_draw_pan || roll_draw_vol) {
+    if (roll_editing != -1 || roll_erasing == 2 || roll_draw_pan || roll_draw_vol) {
         roll_push_history()
     }
     roll_moving = 0
