@@ -1025,13 +1025,13 @@ fn round($x) {
     ret(floor($x + 0.5))
 }
 
-fn draw_track_attr($t, $x_sta, $x_fin, $y_sta, $y_fin) {
+fn draw_track_attr($t, $x_sta, $x_fin, $y_sta, $y_fin, $alpha) {
     $l = roll_tracks[$t]
     $cnt = $l.cnt
     $i = 0
     $col = get_blend(track_colours[$t], WHITE, 96)
 
-    if (roll_playing) { transp(48) } else { transp(192) }
+    transp($alpha)
     while ($i < $cnt) {
         $n = $l[$i]
 
@@ -1164,7 +1164,15 @@ fn draw_roll() {
     }
 
     // Pan area
-    if (roll_playing) { transp(56) } else { transp(224) }
+    if (roll_playing) {
+        $sel_count = 0
+        $i = 0
+        while $i < 16 {
+            $sel_count + ((roll_track_sel >> $i) & 1)
+            $i + 1
+        }
+        transp(224 - $sel_count * 14)
+    } else { transp(224) }
     fbox(roll_x, roll_y + roll_h - roll_vol_h - roll_pan_h,
         roll_w, roll_pan_h, get_blend(nord9, BLACK, 64))
     print("L", roll_x + 1,
@@ -1179,5 +1187,7 @@ fn draw_roll() {
         roll_w, roll_vol_h, get_blend(nord7, BLACK, 64))
 
     // Draw attributes for selected track
-    draw_track_attr(roll_tid, $x_sta, $x_fin, $y_sta, $y_fin)
+    $alpha = 192
+    if (roll_playing) { $alpha - $sel_count * 12 }
+    draw_track_attr(roll_tid, $x_sta, $x_fin, $y_sta, $y_fin, $alpha)
 }
