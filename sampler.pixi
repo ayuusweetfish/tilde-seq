@@ -4,6 +4,8 @@ drumtab = new(42, 1, INT)
 oscdata = load("Wave/Wave.dat")
 if (get_xsize(oscdata) != 25600) { halt }
 
+master_gain = 1
+
 $i = 0
 while ($i < 100) {
     osctab[$i] = new(512, 1, INT16)
@@ -136,6 +138,13 @@ fn lanczos_resmp($table, $sz, $x) {
     ret($r / $den)
 }
 
+fn sat_add($x, $y) {
+    $z = $x + $y
+    if ($z >= 32767) { ret(32767) }
+    if ($z < -32767) { ret(-32767) }
+    ret($z)
+}
+
 fn audio_callback($stream, $userdata, $channels, $frames,
     $output_time_in_system_ticks, $in_channels, $latency_in_frames)
 {
@@ -179,7 +188,7 @@ fn audio_callback($stream, $userdata, $channels, $frames,
             smpconf[SMP_LOOP_LEN] = $loop
             smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
             smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
-            smpconf[SMP_VOL1] = $lvol
+            smpconf[SMP_VOL1] = $lvol * master_gain
             smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
             smpconf[SMP_DELTA] = $delta
             sampler(smpconf)
@@ -188,20 +197,20 @@ fn audio_callback($stream, $userdata, $channels, $frames,
             smpconf[SMP_DEST] = aud_buf3
             smpconf[SMP_SRC_OFF_H] = track_phase[$i] >> 16
             smpconf[SMP_SRC_OFF_L] = track_phase[$i] & 0xffff
-            smpconf[SMP_VOL1] = $rvol
+            smpconf[SMP_VOL1] = $rvol * master_gain
             smpconf[SMP_VOL2] = smpconf[SMP_VOL1]
             sampler(smpconf)
             op_cc(OP_SADD, aud_buf1, aud_buf3)
         } else {
-            $lvol / 32768
-            $rvol / 32768
+            $lvol = $lvol / 32768 * master_gain
+            $rvol = $rvol / 32768 * master_gain
             $offs = track_phase[$i]
             $p = 0
             $sz = get_xsize($src)
             while ($p < $frames) {
                 $sample = lanczos_resmp($src, $sz, $offs)
-                aud_buf0[$p] + round($sample * $lvol)
-                aud_buf1[$p] + round($sample * $rvol)
+                aud_buf0[$p] = sat_add(aud_buf0[$p], round($sample * $lvol))
+                aud_buf1[$p] = sat_add(aud_buf1[$p], round($sample * $rvol))
                 $offs + $delta
                 if ($loop != 0 && $offs >= $loop) {
                     $offs - $loop
