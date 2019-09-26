@@ -90,8 +90,8 @@ fn update_track_btns() {
 }
 
 fn switch_track_cb($sender) {
-    last_track_btn = $sender.track_idx
     switch_track($sender.track_idx)
+    last_track_btn = $sender.track_idx
     update_track_btns()
     // roll_changed is set to 1 in switch_track()
     // so the screen will be redrawn
@@ -315,8 +315,8 @@ while (running) {
                 $i + 1
             }
             if ($t != -1) {
-                last_track_btn = $t
                 switch_track($t)
+                last_track_btn = $t
                 update_track_btns()
             }
             // Space bar: play/stop

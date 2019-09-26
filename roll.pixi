@@ -493,12 +493,23 @@ fn switch_track($t) {
             $t + 1
         }
     } else {
+        if (roll_shift) {
+            $s = last_track_btn
+        printf("%d %d\n", $s, $t)
+            if ($s > $t) {
+                $u = $s
+                $s = $t
+                $t = $u
+            }
+        } else {
+            $s = $t
+        }
         $i = 0
         while ($i < 16) {
-            if ($i != $t) { note_off($i) }
+            if ($i < $s || $i > $t) { note_off($i) }
             $i + 1
         }
-        roll_track_sel = (1 << $t)
+        roll_track_sel = (1 << ($t + 1)) - (1 << $s)
     }
     roll_tid = $t
     roll_changed = 1
