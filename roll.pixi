@@ -689,7 +689,7 @@ fn roll_break($x) {
 }
 
 fn roll_cut() {
-    roll_copy(0)
+    roll_copy()
     roll_shrink()
     roll_sfin = roll_sside
 }
@@ -702,7 +702,7 @@ fn sort_sel_endpts() {
     }
 }
 
-fn roll_copy($save_history) {
+fn roll_copy() {
     sort_sel_endpts()
     $x1 = roll_sside
     $x2 = roll_sfin
@@ -742,7 +742,7 @@ fn roll_copy($save_history) {
         $j + 1
     }
 
-    if ($save_history) { roll_push_history() }
+    roll_reload_current_undo_state()
 }
 
 fn roll_clear_clipboard() {
@@ -942,26 +942,26 @@ fn roll_push_history() {
     file_unsaved = 1
 }
 
+fn roll_reload_current_undo_state() {
+    $i = 0
+    while ($i < 16) {
+        roll_tracks[$i] = duplicate_track(roll_history[roll_hist_ptr][$i])
+        $i + 1
+    }
+}
+
 fn roll_undo() {
     if (roll_shift) { roll_redo() ret }
     if (roll_hist_ptr > 0) {
         roll_hist_ptr - 1
-        $i = 0
-        while ($i < 16) {
-            roll_tracks[$i] = duplicate_track(roll_history[roll_hist_ptr][$i])
-            $i + 1
-        }
+        roll_reload_current_undo_state()
     }
 }
 
 fn roll_redo() {
     if (roll_hist_ptr < roll_hist_top) {
         roll_hist_ptr + 1
-        $i = 0
-        while ($i < 16) {
-            roll_tracks[$i] = duplicate_track(roll_history[roll_hist_ptr][$i])
-            $i + 1
-        }
+        roll_reload_current_undo_state()
     }
 }
 

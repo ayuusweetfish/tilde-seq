@@ -161,7 +161,7 @@ menu_btns_text[4].cb = roll_redo
 menu_btns_text[5].cb = {
     if (roll_shift) { roll_clearsel() } else { roll_cut() }
 }
-menu_btns_text[6].cb = { roll_copy(1) }
+menu_btns_text[6].cb = roll_copy
 menu_btns_text[7].cb = roll_paste
 menu_btns_text[8].cb = {
     roll_toggle_play()

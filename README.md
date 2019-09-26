@@ -23,8 +23,8 @@ Range actions (cut, copy, paste) and playback only involve **selected tracks** (
 * Draw/drag to create/edit notes
 * **Ctrl**-drag to move around
 * Scroll to move horizontally
-* **Shift**-Scroll to move vertically
-* **Ctrl**-Scroll to zoom horizontally
+* **Shift**-scroll to move vertically
+* **Ctrl**-scroll to zoom horizontally
 * **Ctrl**-**Shift**-scroll to zoom vertically
 * Drag in the selection area (white bar on the top) to select
 
@@ -66,9 +66,7 @@ Range actions (cut, copy, paste) and playback only involve **selected tracks** (
 
   To-do.
 
-* Copying makes changes in the tracks
-
-  A minor fix is on the to-do.
+* **(Fixed)** ~~Copying makes changes in the tracks~~
 
 * Pressing Escape key on the file selection dialogue causes the program to freeze and/or quit
 
