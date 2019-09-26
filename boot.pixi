@@ -21,6 +21,8 @@ font_img = load("font.png")
 set_key_color(font_img, BLACK)
 set_font(0x20, font_img, 16, 6)
 
+app_icon = load("icon.png")
+
 last_xsize = -1
 last_ysize = -1
 
@@ -236,6 +238,8 @@ fn draw() {
         fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, 19, WINDOW_YSIZE, nord0)
         fbox(-WINDOW_XSIZE div 2, -WINDOW_YSIZE div 2, WINDOW_XSIZE, 19, nord0)
     }
+
+    pixi(app_icon, -WINDOW_XSIZE div 2 + 8, -WINDOW_YSIZE div 2 + 8)
 
     draw_btns()
 
