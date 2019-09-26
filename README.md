@@ -1,4 +1,6 @@
-# Tilde sequencer
+# Tilde sequencer {'~'}
+
+![ ](icon_large.png)
 
 **Tilde** is a simplistic music sequencer that speaks the [Organya](https://cavestory.fandom.com/wiki/Soundtrack) format.
 
@@ -44,7 +46,7 @@ Range actions (cut, copy, paste) and playback only involve **selected tracks** (
 ### Secondary menu actions
 
 * **Ctrl**-any track (**Ctrl-1/2/3/4/5/6/7/8/Q/W/E/R/T/Y/U/I**): Multiple track selection
-* **Shift**-any track (**Ctrl-1/2/3/4/5/6/7/8/Q/W/E/R/T/Y/U/I**): Range track selection
+* **Shift**-any track (**Shift-1/2/3/4/5/6/7/8/Q/W/E/R/T/Y/U/I**): Range track selection
 * **Shift**-Save (**Shift-Ctrl-S**): Save as
 * **Shift**-Cut (**Shift-Ctrl-X**): Clear selection
 * **Shift**-Copy (**Shift-Ctrl-C**): Set as loop range
