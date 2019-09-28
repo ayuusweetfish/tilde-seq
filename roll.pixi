@@ -252,15 +252,23 @@ fn advance_play_pos() {
 
         $l = roll_tracks[$j]
         $cnt = $l.cnt
+
+        // Note off placed before note on
+        // as there may be attributive notes (0-length)
+        // and consecutive notes
+        // XXX: Optimize?
         $i = 0
         while ($i < $cnt) {
             $n = $l[$i]
-            // Note off placed before note on
-            // as there may be attributive notes (0-length)
-            // and consecutive notes
             if ($n.y != NOCHANGE && $n.x + $n.len == $x) {
                 note_off($j)
             }
+            $i + 1
+        }
+
+        $i = 0
+        while ($i < $cnt) {
+            $n = $l[$i]
             if ($n.x == $x) {
                 $freq = -1
                 $vol = -1
