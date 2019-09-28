@@ -378,6 +378,8 @@ fn roll_mouse_scroll($val) {
             // Move vertically
             roll_py - ($val * 13)
         }
+        roll_start_play_px = roll_px
+        roll_start_play_py = roll_py
         roll_changed = 1
     } else {
         if (roll_shift == 0) {
@@ -841,6 +843,37 @@ fn roll_shrink() {
     }
 
     roll_push_history()
+}
+
+fn roll_transpose($delta) {
+    sort_sel_endpts()
+    $x1 = roll_sside
+    $x2 = roll_sfin
+
+    if (roll_ctrl) { $delta * 12 }
+
+    $j = 0
+    while ($j < 16) {
+        if ((roll_track_sel & (1 << $j)) == 0) { $j + 1 continue }
+
+        $l = roll_tracks[$j]
+        $cnt = $l.cnt
+        $i = 0
+        while ($i < $cnt) {
+            $n = $l[$i]
+            if ($n.x >= $x1 && $n.x <= $x2 &&
+                $n.y + $delta >= 0 && $n.y + $delta <= HIGHEST_NOTE)
+            {
+                $n.y + $delta
+            }
+
+            $i + 1
+        }
+
+        $j + 1
+    }
+
+    roll_changed = 1
 }
 
 fn roll_clearsel() {

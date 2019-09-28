@@ -42,6 +42,8 @@ Range actions (cut, copy, paste) and playback only involve **selected tracks** (
 * **Space**: Play/Stop
 * **Ctrl-P**: Options
 * **Ctrl-,**: Config
+* **Up/Down**: Transpose
+* **Ctrl-Up/Down**: Transpose by octaves
 
 ### Secondary menu actions
 

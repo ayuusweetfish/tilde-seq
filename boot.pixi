@@ -324,6 +324,9 @@ while (running) {
                 menu_btns_text[8].cb()
                 changed = 1
             }
+            // Up/down arrows: transpose
+            if (EVT[EVT_KEY] == KEY_UP) { roll_transpose(1) }
+            if (EVT[EVT_KEY] == KEY_DOWN) { roll_transpose(-1) }
             // Other shortcuts
             if (roll_ctrl) {
                 $i = 0
