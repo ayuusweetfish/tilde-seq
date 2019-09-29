@@ -2,6 +2,9 @@
 // Ctrl + drag: Pan
 // Ctrl + scroll: Zoom
 
+alive = 0
+alivet = 0
+
 CELL_HEIGHT = 8
 CELL_WIDTH = 13
 MAX_TICKS = 0xffff
@@ -531,7 +534,8 @@ fn roll_clear() {
     while ($i < 16) {
         $j = 0
         while ($j < roll_tracks[$i].cnt) {
-            release(roll_tracks[$i][$j])
+            remove_track_notes(roll_tracks[$i][$j])
+            remove(roll_tracks[$i][$j])
             $j + 1
         }
         roll_tracks[$i].cnt = 0
@@ -567,6 +571,8 @@ fn add_note($tid, $x, $y, $len, $vol, $pan) {
 
 fn remove_note($tid, $i) {
     $l = roll_tracks[$tid]
+    alive - 1
+    printf("Remove %d %d\n", $l[$i], alive)
     remove($l[$i])
     $l.cnt - 1
     $l[$i] = $l[$l.cnt]
@@ -915,22 +921,34 @@ fn duplicate_track($l) {
     $i = 0
     while ($i < $cnt) {
         $ret[$i] = clone($l[$i])
+        alive + 1
+        printf("Clone  %d %d\n", $ret[$i], alive)
         $i + 1
     }
+
+    alivet + 1
+    printf("Track  %d %d\n", $ret, alivet)
 
     autorel($ret)
     ret($ret)
 }
 
-fn release_track($l) {
-    if ($l.ref == 1) {
-        $cnt = $l.cnt
-        $i = 0
-        while ($i < $cnt) {
-            release($l[$i])
-            $i + 1
-        }
+fn remove_track_notes($l) {
+    alivet - 1
+    printf("Clear  %d %d\n", $l, alivet)
+
+    $cnt = $l.cnt
+    $i = 0
+    while ($i < $cnt) {
+        remove($l[$i])
+        alive - 1
+        printf("Del    %d %d\n", $l[$i], alive)
+        $i + 1
     }
+}
+
+fn release_track($l) {
+    if ($l.ref == 1) { remove_track_notes($l) }
     release($l)
 }
 
@@ -986,7 +1004,10 @@ fn roll_push_history() {
 fn roll_reload_current_undo_state() {
     $i = 0
     while ($i < 16) {
+        $orig = roll_tracks[$i]
         roll_tracks[$i] = duplicate_track(roll_history[roll_hist_ptr][$i])
+        remove_track_notes($orig)
+        remove($orig)
         $i + 1
     }
 }
