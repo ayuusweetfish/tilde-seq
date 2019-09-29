@@ -2,9 +2,6 @@
 // Ctrl + drag: Pan
 // Ctrl + scroll: Zoom
 
-alive = 0
-alivet = 0
-
 CELL_HEIGHT = 8
 CELL_WIDTH = 13
 MAX_TICKS = 0xffff
@@ -508,7 +505,6 @@ fn switch_track($t) {
     } else {
         if (roll_shift) {
             $s = last_track_btn
-        printf("%d %d\n", $s, $t)
             if ($s > $t) {
                 $u = $s
                 $s = $t
@@ -571,8 +567,6 @@ fn add_note($tid, $x, $y, $len, $vol, $pan) {
 
 fn remove_note($tid, $i) {
     $l = roll_tracks[$tid]
-    alive - 1
-    printf("Remove %d %d\n", $l[$i], alive)
     remove($l[$i])
     $l.cnt - 1
     $l[$i] = $l[$l.cnt]
@@ -921,28 +915,18 @@ fn duplicate_track($l) {
     $i = 0
     while ($i < $cnt) {
         $ret[$i] = clone($l[$i])
-        alive + 1
-        printf("Clone  %d %d\n", $ret[$i], alive)
         $i + 1
     }
-
-    alivet + 1
-    printf("Track  %d %d\n", $ret, alivet)
 
     autorel($ret)
     ret($ret)
 }
 
 fn remove_track_notes($l) {
-    alivet - 1
-    printf("Clear  %d %d\n", $l, alivet)
-
     $cnt = $l.cnt
     $i = 0
     while ($i < $cnt) {
         remove($l[$i])
-        alive - 1
-        printf("Del    %d %d\n", $l[$i], alive)
         $i + 1
     }
 }
