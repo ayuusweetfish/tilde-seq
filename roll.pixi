@@ -873,6 +873,7 @@ fn roll_transpose($delta) {
         $j + 1
     }
 
+    roll_push_history()
     roll_changed = 1
 }
 
