@@ -877,6 +877,18 @@ fn roll_transpose($delta) {
     roll_changed = 1
 }
 
+fn roll_special_edit() {
+    // NOTE: Replace this with anything!
+    $l = roll_tracks[2]
+    $cnt = $l.cnt
+    $i = 0
+    while ($i < $cnt) {
+        $n = $l[$i]
+        $n.vol = 0x80
+        $i + 1
+    }
+}
+
 fn roll_clearsel() {
     sort_sel_endpts()
     $x1 = roll_sside

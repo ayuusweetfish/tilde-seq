@@ -338,6 +338,11 @@ while (running) {
                     }
                     $i + 1
                 }
+                if (EVT[EVT_KEY] == 'b') {
+                    roll_special_edit()
+                    changed = 1
+                    break
+                }
             }
         }
         if (EVT[EVT_TYPE] == EVT_BUTTONUP) {
